@@ -158,6 +158,13 @@ func HTTPGenerate(c echo.Context) error{
 		mod = 0
 	}else if version == "onlyRun"{
 		mod = 1
+	}else if version == "autoRemove"{
+		mod = 2
+	}else if version == "antiCloud"{
+		mod = 3
+	}else if version == "full"{
+		mod = 4
+
 	}
 	File:=Generate(domain,port,mod)
 	if File == ""{

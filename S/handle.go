@@ -426,6 +426,12 @@ func Generate(domain string,port string,version int)string  {
 		path = "Server\\default.dat"
 	}else if version == 1{
 		path = "Server\\justRun.dat"
+	}else if version == 2{
+		path = "Server\\autoRemove.dat"
+	}else if version == 3{
+		path = "Server\\antiCloud.dat"
+	}else if version == 4{
+		path = "Server\\fill.dat"
 	}
 	fmt.Println("D:",len(bDomain),"P:",len(bPort),len(ipFlag),len(portFlag))
 	b, err := ioutil.ReadFile(path)

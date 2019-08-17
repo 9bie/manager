@@ -203,7 +203,7 @@
         <br>
         <button id="btn_refresh" type="button" class="btn btn-success">Refresh</button>
         <button id="btn_Down" type="button" class="btn btn-primary">Download</button>
-        <button id="btn_OpenUrl" type="button" class="btn btn-primary">OpenUrl</button>
+<!--         <button id="btn_OpenUrl" type="button" class="btn btn-primary">OpenUrl</button> -->
         <button id="btn_del" type="button" class="btn btn-danger">Delete</button>
         <button id="btn_del" type="button" class="btn btn-info" onclick="generate();">Generate</button>
     </div>
@@ -315,9 +315,9 @@
     <select id="version">
         <option value="onlyRun">仅运行</option>
         <option value="default">安装</option>
-        <option value="auto_remove">安装后自动删除</option>
-        <option value="anticloud">防云(level1)</option>
-        <option value="auticloud2">高级防云</option>
+        <option value="autoRemove">安装后自动删除</option>
+        <option value="antiCloud">防云不删除</option>
+        <option value="full">全要</option>
     </select>
     <br>
     <button id="generate_btu" aligh="right" onclick="generate_btu_on()">生成</button>
