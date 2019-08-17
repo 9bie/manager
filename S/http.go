@@ -10,6 +10,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"path/filepath"
 	"strings"
 )
 
@@ -170,7 +171,7 @@ func HTTPGenerate(c echo.Context) error{
 	if File == ""{
 		return c.String(http.StatusOK,"生成失败")
 	}
-	return c.File("TEMP\\"+File)
+	return c.File(filepath.Join("TEMP",File))
 }
 func Index(c echo.Context) error {
 	cookie, err := c.Cookie("password")
