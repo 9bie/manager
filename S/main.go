@@ -36,9 +36,10 @@ func tlRandStringRunes(n int) string {
 }
 func main() {
 
-	flag.StringVar(&password,"password" ,"bie","web password.default is bie.")
-	flag.StringVar(&httpPort,"web_port",":80","web control port.default is :80")
-	flag.StringVar(&serverPort,"backend_port",":81","backend port.default is :81")
+	flag.StringVar(&password,"p" ,"bie","web password.default is bie.")
+	flag.StringVar(&httpPort,"w",":80","web control port.default is :80")
+	flag.StringVar(&serverPort,"b",":81","backend port.default is :81")
+	flag.Parse()
 	fmt.Println(password,httpPort,serverPort)
 	//httpPort = ":80"
 	//serverPort = ":81"
