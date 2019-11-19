@@ -139,13 +139,20 @@ func WsHandle(c echo.Context) error {
 			}
 			for _,id := range iid{
 				for i := range serverMap {
-					if serverMap[i].uuid == string(id) {
+					if serverMap[i].uuid == id {
 						fmt.Println("find it.")
 						FunctionDownload(i,address,save_path,run)
 					}
 				}
 			}
 			continue
+		case "info":
+			msg := fmt.Sprintf("info|%s|%s", len(wsMap), len(serverMap))
+			err := ws.WriteMessage(websocket.TextMessage, []byte(msg))
+			if err != nil {
+				wsMap = RemoveWs(ws)
+				return err
+			}
 		}
 
 	}

