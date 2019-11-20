@@ -14,7 +14,6 @@ type S struct {
 	ip     string
 	intIp string
 	hostName string
-	status int // CONST: SERVER_
 	shellInChan chan string
 }
 
@@ -26,7 +25,7 @@ var password string
 var httpPort string
 var serverPort string
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
+var Pass = "PassW0rd!...\x00"
 func tlRandStringRunes(n int) string {
 	b := make([]rune, n)
 	for i := range b {
