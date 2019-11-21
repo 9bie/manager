@@ -35,7 +35,7 @@ func Broadcast(msg string) {
 		err := i.WriteMessage(websocket.TextMessage, []byte(msg))
 		if err != nil {
 			fmt.Println("Broadcast ws :",err.Error())
-			i.Close()
+			_ = i.Close()
 		}
 	}
 }
