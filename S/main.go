@@ -22,6 +22,7 @@ type S struct {
 var tcpConn bool
 var httpConn bool
 var serverMap = make(map[net.Conn]*S)
+
 var sign = "customize\x00"
 var password string
 var httpPort string

@@ -6,6 +6,8 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	uuid "github.com/satori/go.uuid"
+
 	"html/template"
 	"io"
 	"log"
@@ -16,6 +18,7 @@ import (
 
 var upgrader = websocket.Upgrader{}
 var wsMap []*websocket.Conn
+var shellMap = make(map[*websocket.Conn]string)
 // TemplateRenderer is a custom html/template renderer for Echo framework
 type TemplateRenderer struct {
 	templates *template.Template
@@ -55,10 +58,20 @@ func WsHandle(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+	u1, _ := uuid.NewV4()
+
 	defer func() {
+		wsMap = RemoveWs(ws)
 		_ = ws.Close()
+		if _, ok := shellMap[ws]; !ok {
+			delete(shellMap,ws)
+		}
+
 	}()
 	wsMap = append(wsMap, ws)
+
+
+	shellMap[ws] = u1.String()
 	for ; ; {
 		_, msg, err := ws.ReadMessage()
 		if err != nil {
@@ -88,6 +101,9 @@ func WsHandle(c echo.Context) error {
 			}
 		case "offline":
 			wsMap = RemoveWs(ws)
+			if _, ok := shellMap[ws]; !ok {
+				delete(shellMap,ws)
+			}
 			return nil
 		case "shell":
 			var code string

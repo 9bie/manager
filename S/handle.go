@@ -2,7 +2,9 @@ package main
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
+	"github.com/axgle/mahonia"
 	"github.com/fananchong/cstruct-go"
 	uuid "github.com/satori/go.uuid"
 	"io/ioutil"
@@ -179,7 +181,6 @@ func doServerStuff(conn net.Conn) {
 			if err != nil {
 				fmt.Println("Error reading Code:", l, err.Error())
 				_ = conn.Close()
-
 				if _, ok := serverMap[conn]; ok {
 					// 判断是否在表里，因为也许被Clock给杀了
 					offlineMsg := fmt.Sprintf("remove|%s|%s", serverMap[conn].uuid, serverMap[conn].intIp)
@@ -244,7 +245,7 @@ func tlLoadMsg(code int, l int) MSG {
 	return msg
 }
 func tlShellHandle(conn net.Conn){
-/*
+
 	s := serverMap[conn]
 	go func() {
 		for {
@@ -305,7 +306,7 @@ func tlShellHandle(conn net.Conn){
 		}
 
 	}
-*/
+
 }
 // 主动接管
 func Handle(conn net.Conn, code int) {

