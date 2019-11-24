@@ -2,6 +2,7 @@
     "files.associations": {
         "windows.h": "c",
         "winsock2.h": "c",
-        "process.h": "c"
+        "process.h": "c",
+        "memory.h": "c"
     }
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/axgle/mahonia"
 	"github.com/fananchong/cstruct-go"
+	"github.com/gorilla/websocket"
 	uuid "github.com/satori/go.uuid"
 	"io/ioutil"
 	"math/rand"
@@ -65,7 +66,7 @@ func doServerStuff(conn net.Conn) {
 			buf := make([]byte, unsafe.Sizeof(MSG{}))
 			l, err := conn.Read(buf)
 			if err != nil {
-				fmt.Println("Error reading Code:", l, err.Error())
+				fmt.Println("1.Error reading Code:", l, err.Error())
 				return
 			}
 			var msg = *(**MSG)(unsafe.Pointer(&buf))
@@ -126,7 +127,7 @@ func doServerStuff(conn net.Conn) {
 					buf := make([]byte, unsafe.Sizeof(MSG{}))
 					l, err = conn.Read(buf)
 					if err != nil {
-						fmt.Println("Error reading Code:", l, err.Error())
+						fmt.Println("2.Error reading Code:", l, err.Error())
 						return
 					}
 					var msg = *(**MSG)(unsafe.Pointer(&buf))
@@ -168,18 +169,21 @@ func doServerStuff(conn net.Conn) {
 								}
 								serverMap[conn] = &newS
 							}
+
 							onlineMsg := fmt.Sprintf("add|%s|%s|%s|%s|%s|%s", serverMap[conn].uuid, serverMap[conn].intIp, serverMap[conn].ip, serverMap[conn].memory, serverMap[conn].OS,serverMap[conn].hostName)
 							Broadcast(onlineMsg)
 						}
 					}
 				}
 			}
+			go tlShellHandle(conn)
 			Handle(conn,SERVER_LOGIN)
 		} else {
 			buf := make([]byte, unsafe.Sizeof(MSG{}))
 			l, err := conn.Read(buf)
+
 			if err != nil {
-				fmt.Println("Error reading Code:", l, err.Error())
+				fmt.Println("3.Error reading Code:", l, err.Error())
 				_ = conn.Close()
 				if _, ok := serverMap[conn]; ok {
 					// 判断是否在表里，因为也许被Clock给杀了
@@ -190,10 +194,38 @@ func doServerStuff(conn net.Conn) {
 				return
 			}
 			var msg = *(**MSG)(unsafe.Pointer(&buf))
+			fmt.Println("Recv:",msg.mod)
 			switch msg.mod {
 
 			case SERVER_HEARTS:
 				Handle(conn, SERVER_HEARTS)
+			case SERVER_SHELL_CHANNEL:
+				s:=serverMap[conn]
+				full := make([]byte, msg.l)
+				l, err := conn.Read(full)
+				if err != nil || l == 0 {
+					return
+				}
+				m := strings.Split(string(full), "|")
+				if len(m) < 2{
+					return
+				}
+				dec := mahonia.NewDecoder("GBK")
+				decShell:=dec.ConvertString(m[1])
+				encodeString := base64.StdEncoding.EncodeToString([]byte(decShell))
+				msg := fmt.Sprintf("out|%s|%s", s.uuid, encodeString)
+				for i,u := range shellMap{
+					if u == m[0]{
+						err := i.WriteMessage(websocket.TextMessage, []byte(msg))
+						if err != nil {
+							fmt.Println("Broadcast ws :",err.Error())
+							_ = i.Close()
+							delete(shellMap,i)
+						}
+					}
+				}
+
+
 			}
 
 		}
@@ -245,42 +277,61 @@ func tlLoadMsg(code int, l int) MSG {
 	return msg
 }
 func tlShellHandle(conn net.Conn){
-
-	s := serverMap[conn]
-	go func() {
-		for {
-			buf := make([]byte, unsafe.Sizeof(MSG{}))
-			l, err := conn.Read(buf)
-			var h = *(**MSG)(unsafe.Pointer(&buf))
-			if err != nil || l == 0 {
-				return
-			}
-			switch h.mod {
-			case SERVER_SHELL_CHANNEL:
-				shell := make([]byte, h.l)
-				l, err := conn.Read(shell)
-				if err != nil || l == 0 {
-
-					return
-				}
-				dec := mahonia.NewDecoder("GBK")
-				decShell:=dec.ConvertString(string(shell))
-				encodeString := base64.StdEncoding.EncodeToString([]byte(decShell))
-				msg := fmt.Sprintf("out|%s|%s", s.uuid, encodeString)
-				Broadcast(msg)
-			case SERVER_SHELL_ERROR:
-				Handle(conn,SERVER_HEARTS)
-				return
-			case SERVER_RESET:
-				Handle(conn,SERVER_HEARTS)
+	defer func() {
+		for i,v := range shellHandle {
+			if v == conn{
+				shellHandle = append(shellHandle[:i], shellHandle[i+1:]...)
 				return
 			}
 		}
 	}()
+	for _,v := range shellHandle {
+		if v == conn{
+			// 验证是否已经在运行
+			return
+		}
+	}
+	shellHandle = append(shellHandle,conn)
+	s := serverMap[conn]
+	//go func() {
+	//	for {
+	//		buf := make([]byte, unsafe.Sizeof(MSG{}))
+	//		l, err := conn.Read(buf)
+	//		var h = *(**MSG)(unsafe.Pointer(&buf))
+	//		if err != nil || l == 0 {
+	//			return
+	//		}
+	//		switch h.mod {
+	//		case SERVER_SHELL_CHANNEL:
+	//			shell := make([]byte, h.l)
+	//			l, err := conn.Read(shell)
+	//			if err != nil || l == 0 {
+	//
+	//				return
+	//			}
+	//			dec := mahonia.NewDecoder("GBK")
+	//			decShell:=dec.ConvertString(string(shell))
+	//			encodeString := base64.StdEncoding.EncodeToString([]byte(decShell))
+	//			msg := fmt.Sprintf("out|%s|%s", s.uuid, encodeString)
+	//			Broadcast(msg)
+	//		case SERVER_SHELL_ERROR:
+	//			continue
+	//		case SERVER_RESET:
+	//			continue
+	//		}
+	//	}
+	//}()
 	for {
 
 		shell, _ := <-s.shellInChan
-		if shell == "reset\n" {
+		fmt.Println("ShellInChan::",shell)
+		m := strings.Split(shell, "|")
+		if len(m) < 2{
+			// 错误的代码结构，忽略
+			continue
+		}
+
+		if m[1] == "ext\n" {
 			msg := tlLoadMsg(SERVER_RESET, 0)
 			bMsg, _ := cstruct.Marshal(&msg)
 			l, err := conn.Write(bMsg)
@@ -289,9 +340,9 @@ func tlShellHandle(conn net.Conn){
 				return
 			}
 			fmt.Println("Shell Handle exit.")
-			return
+			continue
 		}
-		msg := tlLoadMsg(SERVER_SHELL_CHANNEL, len(shell))
+		msg := tlLoadMsg(SERVER_SHELL, len([]byte(shell)))
 		bMsg, _ := cstruct.Marshal(&msg)
 		l, err := conn.Write(bMsg)
 		if err != nil || l == 0 {
@@ -299,7 +350,7 @@ func tlShellHandle(conn net.Conn){
 			return
 		}
 		l, err = conn.Write([]byte(shell))
-		fmt.Println("send:", shell)
+		fmt.Println("send:", shell,"  len:",len([]byte(shell)))
 		if err != nil || l == 0 {
 			fmt.Println("Send Error", err.Error())
 			return
@@ -315,6 +366,7 @@ func Handle(conn net.Conn, code int) {
 
 		s := serverMap[conn]
 		s.ttl = time.Now()
+		fmt.Println("set",s.ttl)
 		return
 	case SERVER_SHELL:
 		msg := tlLoadMsg(SERVER_SHELL, 0)
@@ -395,14 +447,19 @@ func Clock(){
 	for{
 		for conn,s := range serverMap{
 			if time.Now().Sub(s.ttl) > time.Minute * 2 {
+				fmt.Println("clock:",s.ttl,time.Now().Sub(s.ttl))
 				_ = conn.Close()
 				fmt.Println(s.ip+".....Kill")
-				offlineMsg := fmt.Sprintf("remove|%s|%s", serverMap[conn].uuid, serverMap[conn].intIp)
-				Broadcast(offlineMsg)
-				delete(serverMap, conn)
+				if _, ok := serverMap[conn]; ok {
+					// 看看在不在里面
+					offlineMsg := fmt.Sprintf("remove|%s|%s", serverMap[conn].uuid, serverMap[conn].intIp)
+					Broadcast(offlineMsg)
+					delete(serverMap, conn)
+				}
+
 			}
 		}
-		time.Sleep(time.Second * 2)
+		time.Sleep(time.Minute * 2)
 	}
 
 }

