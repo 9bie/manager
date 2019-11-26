@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	uuid "github.com/satori/go.uuid"
+	"sync"
 
 	"html/template"
 	"io"
@@ -15,18 +16,21 @@ import (
 	"path/filepath"
 	"strings"
 )
-
+type wsMutex struct{
+	con *websocket.Conn
+	mutex sync.Mutex
+}
 var upgrader = websocket.Upgrader{}
-var wsMap []*websocket.Conn
+var wsMap []wsMutex
 var shellMap = make(map[*websocket.Conn]string)
 // TemplateRenderer is a custom html/template renderer for Echo framework
 type TemplateRenderer struct {
 	templates *template.Template
 }
 
-func RemoveWs(i *websocket.Conn) []*websocket.Conn {
+func RemoveWs(i *websocket.Conn) []wsMutex {
 	for i2, v := range wsMap {
-		if v == i {
+		if v.con == i {
 			return append(wsMap[:i2], wsMap[i2+1:]...)
 		}
 	}
@@ -35,11 +39,15 @@ func RemoveWs(i *websocket.Conn) []*websocket.Conn {
 }
 func Broadcast(msg string) {
 	for _, i := range wsMap {
-		err := i.WriteMessage(websocket.TextMessage, []byte(msg))
+
+		i.mutex.Lock()
+		err := i.con.WriteMessage(websocket.TextMessage, []byte(msg))
 		if err != nil {
 			fmt.Println("Broadcast ws :",err.Error())
-			_ = i.Close()
+			_ = i.con.Close()
 		}
+		i.mutex.Unlock()
+
 	}
 }
 
@@ -68,7 +76,11 @@ func WsHandle(c echo.Context) error {
 		}
 
 	}()
-	wsMap = append(wsMap, ws)
+	wsM:=wsMutex{
+		con:ws,
+		mutex:sync.Mutex{},
+	}
+	wsMap = append(wsMap, wsM)
 	u1, _ := uuid.NewV4()
 	shellToken := u1.String()
 	shellMap[ws] = shellToken
