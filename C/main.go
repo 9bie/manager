@@ -1,4 +1,4 @@
-package C
+package main
 
 import (
 	"./core"
@@ -6,5 +6,6 @@ import (
 
 func main() {
 
-	core.NewClient()
+	_ = core.NewClient()
+	//c.Pool()
 }
