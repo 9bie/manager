@@ -13,6 +13,20 @@ import (
 	"time"
 )
 
+type Information struct {
+	User    string `json:"User"`
+	Remarks string `json:"remarks"`
+	IP      string `json:"ip"`
+}
+
+func GetInformation() Information {
+	return Information{
+		User:    GetUser(),
+		Remarks: GetRemarks(),
+		IP:      GetIPAddress(),
+	}
+}
+
 func RandStringRunes(n int) string {
 	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	b := make([]rune, n)

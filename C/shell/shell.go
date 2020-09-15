@@ -1,38 +1,65 @@
 package shell
 
 import (
+	"io"
 	"io/ioutil"
-	"log"
+	"net/http"
+	"os"
 	"os/exec"
 )
 
-func ExecuteCmd(command string, arg string) {
-	cmd := exec.Command(command, arg)
+type Down struct {
+	Url  string `json:"url"`
+	Path string `json:"path"`
+}
+type Shell struct {
+	Command string `json:"command"`
+	Param   string `json:"param"`
+}
 
-	if stdout, err := cmd.StdoutPipe(); err != nil { //获取输出对象，可以从该对象中读取输出结果
+func (s Shell) ExecuteCmd() string {
+	cmd := exec.Command(s.Command, s.Param)
 
-		return err
-
-	}
+	stdout, _ := cmd.StdoutPipe()
 
 	defer stdout.Close() // 保证关闭输出流
 
 	if err := cmd.Start(); err != nil { // 运行命令
 
-		log.Fatal(err)
+		return err.Error()
 
 	}
 
 	if opBytes, err := ioutil.ReadAll(stdout); err != nil { // 读取输出结果
 
-		log.Fatal(err)
+		return err.Error()
 
 	} else {
 
-		log.Println(string(opBytes))
+		return string(opBytes)
 
 	}
 }
-func Download(url string, path string) {
+func (d Down) Download() string {
 
+	// Get the data
+	resp, err := http.Get(d.Url)
+	if err != nil {
+		return err.Error()
+	}
+	defer resp.Body.Close()
+
+	// 创建一个文件用于保存
+	out, err := os.Create(d.Path)
+	if err != nil {
+		return err.Error()
+	}
+	defer out.Close()
+
+	// 然后将响应流和文件流对接起来
+	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		return err.Error()
+	}
+	return "Download Successful!"
 }
