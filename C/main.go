@@ -5,7 +5,6 @@ import (
 )
 
 func main() {
-
-	_ = core.NewClient()
-	//c.Pool()
+	c := core.NewClient()
+	c.Pool()
 }

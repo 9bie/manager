@@ -45,7 +45,7 @@ func ImmediateRC4(input []byte) []byte {
 	rc4str1 := []byte(input)
 	plaintext := make([]byte, len(rc4str1))
 	rc4obj1.XORKeyStream(plaintext, rc4str1)
-	return plaintext
+		return plaintext
 
 }
 func GetUser() string {
