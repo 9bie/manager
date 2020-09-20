@@ -1,6 +1,11 @@
-CONFIG = {}
+CONFIG = {
+    "web": {},
+    "websocket": {},
+    "database": {}
+}
+
 # Web Control Access
-CONFIG["web"]["debug"] = False
+CONFIG["web"]["debug"] = True
 
 # Web Sockets Access
 CONFIG["websocket"]["host"] = "127.0.0.1"

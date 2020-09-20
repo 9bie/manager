@@ -1,5 +1,6 @@
 from json import loads,dumps
 from queue import Queue
+from ..web import online_list
 import asyncio
 import websockets
 
@@ -25,7 +26,8 @@ async def check_permit(w):
         if cred_dict["username"] == "admin" and cred_dict["password"] == "123456":
             user_list.add(w)
             await w.send(dumps({
-                "login": True
+                "login": True,
+                "data": online_list()
             }))
             return True
         else:
@@ -42,6 +44,7 @@ async def handle(w):
 
 
 async def main_logic(w, path):
+    print("[+][ws]Request Uri:{}".format(path))
     try:
         await check_permit(w)
 

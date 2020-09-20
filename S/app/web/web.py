@@ -1,13 +1,14 @@
 from .backend import *
 from quart import *
-app = Quart(__name__)
-WEB = "/web"
-BACKEND = "/backend"
+
+app = Quart(__name__,static_folder="static")
+WEB = "/web/"
+BACKEND = "/backend/"
 
 
 @app.route(WEB)
 async def web_control():
-    pass
+    return await render_template("manager.html")
 
 
 @app.route(BACKEND)

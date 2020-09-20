@@ -7,6 +7,19 @@ events = queue.Queue()
 Conn = {}
 
 
+def online_list():
+    l = []
+    for k, v in Conn:
+        l.append({
+            "uuid": k,
+            "info": v["info"]
+        })
+    return dumps({
+        "action": "just for you",
+        "data": l
+    })
+
+
 def get_action():
     return events.get()
 
@@ -23,7 +36,8 @@ def online(uuid):
         {
             "action": "online",
             "data": {
-                "uuid": uuid
+                "uuid": uuid,
+                "info": Conn["info"]
             }
         }
     )

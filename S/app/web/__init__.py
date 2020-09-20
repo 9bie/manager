@@ -1,8 +1,9 @@
-from .web import app,get_action,do_action
-import asyncio
+from .web import app,get_action,do_action,online_list
+from quart import *
 
 
-async def create_server(debug):
-    start_server = app.run(debug=debug)
-    asyncio.get_event_loop().run_until_complete(start_server)
-    asyncio.get_event_loop().run_forever()
+def create_server(debug):
+    print("[+]Web Server Running...")
+    # start_server = app.run(debug=debug)
+    return app.run_task(debug=debug)
+
