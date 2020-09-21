@@ -2,17 +2,19 @@
 import queue
 import asyncio
 from app.utils import *
-
+from threading import Thread
+from time import sleep
 events = queue.Queue()
 Conn = {}
 
 
 def online_list():
+
     l = []
-    for k, v in Conn:
+    for k in Conn:
         l.append({
             "uuid": k,
-            "info": v["info"]
+            "info": Conn[k]["info"]
         })
     return dumps({
         "action": "just for you",
@@ -31,13 +33,14 @@ def do_action(uuid, do_something):
 
 
 def online(uuid):
-    asyncio.create_task(timer(uuid))
+    print("[!][BackEnd]Online:{}".format(uuid))
+    Thread(target=timer, args=(uuid,)).start()
     events.put(
         {
             "action": "online",
             "data": {
                 "uuid": uuid,
-                "info": Conn["info"]
+                "info": Conn[uuid]["info"]
             }
         }
     )
@@ -45,21 +48,24 @@ def online(uuid):
 
 def offline(uuid):
     if uuid in Conn:
-        Conn.pop(uuid)
+
         events.put(
             {
                 "action": "offline",
                 "data": {
-                    "uuid": uuid
+                    "uuid": uuid,
+                    "info": Conn[uuid]["info"]["ip"]
                 }
             }
         )
+        Conn.pop(uuid)
 
 
-async def timer(uuid):
+def timer(uuid):
     while True:
-        await asyncio.sleep(Conn[uuid]["next_second"])
-        if int(time()) > Conn["time"] + Conn["next_second"] + 5:
+        sleep(Conn[uuid]["next_second"])
+        if int(time()) > Conn[uuid]["time"] + Conn[uuid]["next_second"] + 5:
+            print("[!][BackEnd]{} TimeOut.".format(uuid))
             offline(uuid)
             break
 
@@ -68,13 +74,13 @@ def handle(packet):
     raw = rc4_decode(packet)
     data = loads(raw)
     if "uuid" not in data or "info" not in data:
-        return
+        return "", 404
     else:
         if data["uuid"] not in Conn:
             Conn[data["uuid"]] = {
                 "info": data["info"],
                 "time": int(time()),
-                "next_second": data["next_second"],
+                "next_second": 30.,
                 "do": []
             }
             online(data["uuid"])
@@ -101,3 +107,9 @@ def handle(packet):
             result = Conn["do"]
             Conn["do"] = []
             return result
+    return dumps(
+        {
+            "do": "",
+            "data": ""
+        }
+    )

@@ -1,6 +1,7 @@
 package config
 
 const (
-	RemoteAddres string = "xxxxxxxxxxxxxxxxxxxxxxxx"
+	RemoteAddres string = "http://127.0.0.1:5000/backend/"
 	DefaultSleep int    = 30
+	Remarks      string = "default"
 )

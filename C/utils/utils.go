@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"../config"
 	"crypto/rc4"
 	"encoding/base64"
 	"fmt"
@@ -14,16 +15,20 @@ import (
 )
 
 type Information struct {
-	User    string `json:"User"`
-	Remarks string `json:"remarks"`
 	IP      string `json:"ip"`
+	User    string `json:"user"`
+	Remarks string `json:"remarks"`
+	IIP     string `json:"iip"`
+	System  string `json:"system"`
 }
 
 func GetInformation() Information {
 	return Information{
+		IP:      "127.0.0.1",
 		User:    GetUser(),
 		Remarks: GetRemarks(),
-		IP:      GetIPAddress(),
+		IIP:     GetIPAddress(),
+		System:  runtime.GOOS,
 	}
 }
 
@@ -45,7 +50,7 @@ func ImmediateRC4(input []byte) []byte {
 	rc4str1 := []byte(input)
 	plaintext := make([]byte, len(rc4str1))
 	rc4obj1.XORKeyStream(plaintext, rc4str1)
-		return plaintext
+	return plaintext
 
 }
 func GetUser() string {
@@ -84,6 +89,9 @@ func SetRemarks(remarks string) bool {
 }
 
 func GetRemarks() string {
+	if os.Getenv("SysRemarks") == "" {
+		return config.Remarks
+	}
 	return EasyDeCrypto(os.Getenv("SysRemarks"))
 }
 
@@ -103,16 +111,16 @@ func GetOSVersion() int {
 }
 func GetIPAddress() string {
 	var IP string
-	addrs, err := net.InterfaceAddrs()
+	adders, err := net.InterfaceAddrs()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	for _, address := range addrs {
+	for _, address := range adders {
 		// 检查ip地址判断是否回环地址
-		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-			if ipnet.IP.To4() != nil {
-				IP += "," + ipnet.IP.String()
+		if inet, ok := address.(*net.IPNet); ok && !inet.IP.IsLoopback() {
+			if inet.IP.To4() != nil {
+				IP += "," + inet.IP.String()
 			}
 		}
 	}

@@ -11,10 +11,10 @@ async def web_control():
     return await render_template("manager.html")
 
 
-@app.route(BACKEND)
+@app.route(BACKEND,methods=['POST'])
 async def backend():
     # todo:check UA and other
-    data = request.form
+    data = await request.get_data()
     return handle(data)
 
 

@@ -2,21 +2,27 @@
 from .ws import create_server, get_action, broadcast
 from .web import create_server, get_action, do_action
 import asyncio
-from json import loads
+from json import dumps
 import threading
 
 def __backend2ws():
 
-    print("[+][b2w]Loop...")
-    action = web.get_action()
-    ws.broadcast(loads(action))
+    while True:
+        action = web.get_action()
+        print("[!][B2W]Action:{}".format(action))
+        asyncio.run(
+            ws.broadcast(dumps(action))
+        )
+
 
 
 def __ws2backend():
 
-    print("[+][w2b]Loop...")
-    action = ws.get_action()
-    web.do_action(action["uuid"], action["do"])
+    while True:
+        action = ws.get_action()
+        print("[!][W2B]Action:{}".format(action))
+
+        web.do_action(action["uuid"], action["do"])
 
 
 def create_app(config):
@@ -29,5 +35,4 @@ def create_app(config):
     loop.run_until_complete(
         web.create_server(config["web"]["debug"])
     )
-
     loop.run_forever()

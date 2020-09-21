@@ -55,8 +55,14 @@ func (c *Core) Pool() {
 			continue
 		}
 		req.Header.Add("UA", "android")
-		resp, _ := client.Do(req)
-		body, _ := ioutil.ReadAll(resp.Body)
+		resp, err := client.Do(req)
+		if err != nil {
+			continue
+		}
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			continue
+		}
 		decode := utils.ImmediateRC4(body)
 		err = json.Unmarshal(decode, &result)
 		if err != nil {

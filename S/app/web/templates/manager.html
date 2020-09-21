@@ -67,12 +67,42 @@
                 let data = JSON.parse(evt.data)
                 if(data["login"]===true){
                     $("#log").append("<p style='color:blue'>后端连接成功</p>")
-                    for(let i=0;i<data["data"];i++){
-
+                    for(let i=0;i<data["data"]["data"];i++){
+                            $("#server_list").append(
+                        `<tr id="`+data["data"]["uuid"]+`">
+                            <td><label>
+                            <input type="checkbox" name="category" value="`+data["data"]["uuid"]+`"/>
+                            </label></td>
+                            <td>`+i["ip"]+`</td>
+                            <td>`+i["remarks"]+`</td>
+                            <td>`+i["system"]+`</td>
+                            <td>`+i["iip"]+`</td>
+                            <td><a href="javascript:new_cmd();">终端</a> <a href="javascript:download();" >下载</a> <a href="#">卸载</a></td>
+                            `
+                        );
+                    $("#log").append("<p style='color:green'>客户上线："+ip+"</p>")
                     }
                 }
                 if(data["action"]==="online"){
-
+                    let i = data["data"]["info"]
+                    $("#server_list").append(
+                        `<tr id="`+data["data"]["uuid"]+`">
+                            <td><label>
+                            <input type="checkbox" name="category" value="`+data["uuid"]+`"/>
+                            </label></td>
+                            <td>`+i["ip"]+`</td>
+                            <td>`+i["remarks"]+`</td>
+                            <td>`+i["system"]+`</td>
+                            <td>`+i["user"]+`</td>
+                            <td>`+i["iip"]+`</td>
+                            <td><a href="javascript:new_cmd();">终端</a> <a href="javascript:download();" >下载</a> <a href="#">卸载</a></td>
+                            `
+                        );
+                    $("#log").append("<p style='color:green'>客户上线："+i["ip"]+"</p>")
+                }
+                if(data["action"] === "offline"){
+                    $(`#`+data["data"]["uuid"]).remove();
+                    $("#log").append("<p style='color:red'>客户下线："+data["data"]["info"]["ip"]+"</p>")
                 }
                 // let flag = msg[0];
                 // let uuid = msg[1];
@@ -243,9 +273,9 @@
             <tr id="title">
                 <td></td>
                 <td>IP</td>
-                <td>Computer Name</td>
+                <td>Remarks</td>
                 <td>OS</td>
-                <td>Memory</td>
+                <td>User</td>
                 <td>Intranet IP</td>
                 <td>Action</td>
             </tr>
@@ -254,8 +284,9 @@
                         <input type="checkbox" name="category" value="s1"/>
                     </label></td>
                 <td>1.1.1.1</td>
+                <td>测试机器1</td>
                 <td>Windows 10</td>
-                <td>Total 15.76 GB (7.59 GB available)</td>
+                <td>administrator</td>
                 <td>192.168.0.7</td>
                 <td><a href="#">终端</a> <a href="#">下载</a> <a href="#">卸载</a></td>
             </tr>

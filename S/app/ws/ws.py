@@ -8,9 +8,9 @@ events = Queue()
 user_list = set()
 
 
-def broadcast(message):
+async def broadcast(message):
     for i in user_list:
-        i.send(message)
+        await i.send(message)
 
 
 def get_action():
@@ -37,10 +37,14 @@ async def check_permit(w):
 
 
 async def handle(w):
-    while True:
-        recv = await w.recv()
-        data = loads(recv)
-        events.put(data)
+    try:
+        while True:
+            recv = await w.recv()
+            data = loads(recv)
+            events.put(data)
+    except Exception as e:
+        if w in user_list:
+            user_list.remove(w)
 
 
 async def main_logic(w, path):
@@ -50,5 +54,6 @@ async def main_logic(w, path):
 
         await handle(w)
     finally:
-        user_list.remove(w)
+        if w in user_list:
+            user_list.remove(w)
 

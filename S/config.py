@@ -1,9 +1,8 @@
-CONFIG = {
-    "web": {},
-    "websocket": {},
-    "database": {}
-}
+CONFIG = {"web": {}, "websocket": {}, "database": {}, "base": {}}
 
+# Base Access
+CONFIG["base"]["secret"] = "this_is secret"
+CONFIG["base"]["default_sleep"] = 30
 # Web Control Access
 CONFIG["web"]["debug"] = True
 
