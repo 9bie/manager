@@ -120,7 +120,7 @@ func GetIPAddress() string {
 		// 检查ip地址判断是否回环地址
 		if inet, ok := address.(*net.IPNet); ok && !inet.IP.IsLoopback() {
 			if inet.IP.To4() != nil {
-				IP += "," + inet.IP.String()
+				IP += inet.IP.String() + ","
 			}
 		}
 	}

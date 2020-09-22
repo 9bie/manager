@@ -2,10 +2,11 @@
 import queue
 import asyncio
 from app.utils import *
-from threading import Thread
+from threading import Timer
 from time import sleep
 events = queue.Queue()
 Conn = {}
+
 
 
 def online_list():
@@ -29,12 +30,12 @@ def get_action():
 def do_action(uuid, do_something):
     if uuid not in Conn:
         return
-    Conn["uuid"]["do"].append(do_something)
+    Conn[uuid]["do"].append(do_something)
 
 
 def online(uuid):
     print("[!][BackEnd]Online:{}".format(uuid))
-    Thread(target=timer, args=(uuid,)).start()
+
     events.put(
         {
             "action": "online",
@@ -62,33 +63,40 @@ def offline(uuid):
 
 
 def timer(uuid):
-    while True:
-        sleep(Conn[uuid]["next_second"])
-        if int(time()) > Conn[uuid]["time"] + Conn[uuid]["next_second"] + 5:
-            print("[!][BackEnd]{} TimeOut.".format(uuid))
-            offline(uuid)
-            break
+        offline(uuid)
+
 
 
 def handle(packet):
     raw = rc4_decode(packet)
     data = loads(raw)
+    first = False
     if "uuid" not in data or "info" not in data:
         return "", 404
     else:
         if data["uuid"] not in Conn:
+            t = Timer(40, timer, (data["uuid"],))
             Conn[data["uuid"]] = {
                 "info": data["info"],
-                "time": int(time()),
-                "next_second": 30.,
+                "timer": t,
+                "next_second": 30,
                 "do": []
             }
+            t.start()
+            first = True
             online(data["uuid"])
 
-        if "next_second" in data:
+        if "next_second" in data and data["next_second"] != 0 and not first:
+
             # 更新表中的时间为下次检测日期
-            Conn[data["uuid"]]["time"]: int(time())
+            Conn[data["uuid"]]["timer"].cancel()
+
             Conn[data["uuid"]]["next_second"] = data["next_second"]
+            t = Timer(data["next_second"]+10, timer, (data["uuid"],))
+            Conn[data["uuid"]]["timer"] = t
+            t.start()
+
+
     if "result" in data and type(data["result"]) is list:
         if data["result"] is not []:
             for i in data["result"]:
@@ -103,13 +111,8 @@ def handle(packet):
                     }
                 )
 
-        else:
-            result = Conn["do"]
-            Conn["do"] = []
-            return result
-    return dumps(
-        {
-            "do": "",
-            "data": ""
-        }
+    result = Conn[data["uuid"]]["do"]
+    Conn[data["uuid"]]["do"] = []
+    return rc4_encode(
+        dumps(result)
     )

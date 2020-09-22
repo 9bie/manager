@@ -1,6 +1,7 @@
 package shell
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -18,6 +19,7 @@ type Shell struct {
 }
 
 func (s Shell) ExecuteCmd() string {
+
 	cmd := exec.Command(s.Command, s.Param)
 
 	stdout, _ := cmd.StdoutPipe()
@@ -25,7 +27,7 @@ func (s Shell) ExecuteCmd() string {
 	defer stdout.Close() // 保证关闭输出流
 
 	if err := cmd.Start(); err != nil { // 运行命令
-
+		fmt.Println(err.Error())
 		return err.Error()
 
 	}
@@ -35,7 +37,7 @@ func (s Shell) ExecuteCmd() string {
 		return err.Error()
 
 	} else {
-
+		fmt.Println("execute", string(opBytes))
 		return string(opBytes)
 
 	}
