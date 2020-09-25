@@ -55,7 +55,7 @@
         }
         uri += '//127.0.0.1:3287';
 
-        alert(uri)
+
         ws = new WebSocket(uri);
         ws.onopen = function () {
             ws.send(JSON.stringify({"username":u,"password":p}));
@@ -67,17 +67,21 @@
                 let data = JSON.parse(evt.data)
                 if(data["login"]===true){
                     $("#log").append("<p style='color:blue'>后端连接成功</p>")
-                    for(let i=0;i<data["data"]["data"];i++){
-                            $("#server_list").append(
+
+                    for(let i=0;i<data["data"]["data"].length;i++){
+                        let z = data["data"]["data"][i]
+                        console.log(z)
+                        $("#server_list").append(
                         `<tr id="`+data["data"]["uuid"]+`">
                             <td><label>
-                            <input type="checkbox" name="category" value="`+data["data"]["uuid"]+`"/>
+                            <input type="checkbox" name="category" value="`+z["uuid"]+`"/>
                             </label></td>
-                            <td>`+i["ip"]+`</td>
-                            <td>`+i["remarks"]+`</td>
-                            <td>`+i["system"]+`</td>
-                            <td>`+i["iip"]+`</td>
-                            <td><a href="javascript:new_cmd('`+i["ip"]+`','`+data["data"]["uuid"]+`');">终端</a> <a href="javascript:download('`+i["ip"]+`','`+data["data"]["uuid"]+`');" >下载</a> <a href="#">卸载</a></td>
+                            <td>`+z["info"]["ip"]+`</td>
+                            <td>`+z["info"]["remarks"]+`</td>
+                            <td>`+z["info"]["system"]+`</td>
+                            <td>`+z["info"]["user"]+`</td>
+                            <td>`+z["info"]["iip"]+`</td>
+                            <td><a href="javascript:new_cmd('`+z["info"]["ip"]+`','`+data["data"]["uuid"]+`');">终端</a> <a href="javascript:download('`+z["info"]["ip"]+`','`+data["data"]["uuid"]+`');" >下载</a> <a href="#">卸载</a></td>
                             `
                         );
                     $("#log").append("<p style='color:green'>客户上线："+ip+"</p>")
@@ -189,14 +193,14 @@
             // document.getElementById('fade').style.display='none';
             $("#generate").css("display","none");
             $("#fade").css("display","none");
-            ws.send("shell|"+nowhandle+"|"+base.encode("reset"));
+
         }
         function download_close(){
             // document.getElementById('light').style.display='none';
             // document.getElementById('fade').style.display='none';
             $("#download").css("display","none");
             $("#fade").css("display","none");
-            ws.send("shell|"+nowhandle+"|"+base.encode("reset"));
+
         }
         function download(ip,id) {
              $("#download").css("display","block");
@@ -361,6 +365,20 @@
     <button id="download_btu" aligh="right" onclick="down_btu_on()">下载</button>
     <p id="d_res"></p>
 
+</div>
+
+<div id="batch_cmd" class="white_content">Web Download
+    <a href = "javascript:void(0)" onclick = "download_close();">关闭</a>
+                    <input id="batch_cmd_input" type="text" class="form-control" style="width: 95%">
+                    <input id="batch_cmd_param" type="text" class="form-control" style="width: 95%">
+                    <button aligh="right" onclick="cmd_execute()">execute</button>
+    os:<select id="os">
+        <option  value="windows">all windows</option>
+        <option value="linux">all linux</option>
+        <option value="select">select</option>
+    </select>
+    <br>
+    <button id="execute_cmd" aligh="right" onclick="down_btu_on()">运行</button>
 
 
 </div>

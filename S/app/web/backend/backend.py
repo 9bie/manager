@@ -17,10 +17,10 @@ def online_list():
             "uuid": k,
             "info": Conn[k]["info"]
         })
-    return dumps({
+    return {
         "action": "just for you",
         "data": l
-    })
+    }
 
 
 def get_action():
