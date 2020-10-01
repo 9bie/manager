@@ -15,9 +15,10 @@
 
 ## 发送流程
 ### 1. Client->Server
-第一个包，构建`Work`结构体，详情可以看`core/core.go`第24行，关于这个结构体作用可以看下面，因为是第一次执行，没有需要返回的值，所以Result字段为
-空，然后又因为是第一次包，所以`NextSecond`字段值为0。这次发包的作用是，返回上一直执行完命令的回显（如果是第一次运行忽略这条），发送自身系统信息
-（Info字段）让服务器上线，同时请求服务器查询是否有需要的消息。
+构建`Work`结构体，详情可以看`core/core.go`第24行，关于这个结构体作用可以看下面，如果是第一次执行，没有需要返回的值，所以Result字段为空。如果下面那个阶段已经完成，`Result`已经有消息，则返回数据
+
+这次发包的作用是，返回上一直执行完命令的回显，发送自身系统信息
+（Info字段）让服务器上线，同时请求服务器查询是否有需要的消息。循环这次
 ### 2. Server->Client
 服务器检查事件队列，判断是否有消息，有消息则判断消息队列中的发送对象是指定uuid还是广播，如果是指定uuid，就检查上线客户中是否有该uuid，有该uuid则
 发送消息，如果是广播，则对在线客户所有发送广播，其中结构体为`[Action]`，可以查看`core/core.go`第30行，记住，发送的是一个队列而不是一个单独的结构体
@@ -26,8 +27,6 @@ Client收到了`Action`结构体后，根据其`Do`所对应的值，对`Data`�
 
 例如值为cmd，则会使用`shell.Shell`的内容，来解析data，之后用里面作为参数进行执行命令，返回放置`Result`结构体中
 
-### 3. Client->Server
-和第一次大同小异，Client段响应了`Action`,并把回显塞入`Work`结构中的`Action`字段，之后设置`NextSecond`为30，发送，然后沉睡30s，回到第一个发送流程
 
 ## 下发命令（开发重点）
 前端直接向websocket端发送json结构体即可，例如要求xxx-xxxx-xxxx执行cmd命令
@@ -109,7 +108,7 @@ type Shell struct {
 		"iip": "172.16.1.1",
 		"system": "windows"
 	},
-	"next_second": 0
+	"next_second": 30
 }
 ```
 客户端上线成功,服务器检查队列，没有任何任务，返回空的`[Action]`
@@ -123,21 +122,7 @@ type Shell struct {
 ```
 
 客户响应`[Action]`内容，发现没东西响应，发送结果包,并设置sleep为30
-客户发送`Work`->
-```json
-{
-	"uuid": "xxx-xxx-xxx-xxx",
-	"result": [],
-	"info": {
-		"ip": "1.1.1.1",
-		"user": "administrator",
-		"remarks": "default",
-		"iip": "172.16.1.1",
-		"system": "windows"
-	},
-	"next_second": 30
-}
-```
+
 沉睡30秒，之后到循环上面步骤
 ## 命令下发（前端重点）
 前端对这个uuid下发了一条消息
@@ -169,7 +154,7 @@ type Shell struct {
 		"iip": "172.16.1.1",
 		"system": "windows"
 	},
-	"next_second": 0
+	"next_second": 30
 }
 ```
 
@@ -185,6 +170,8 @@ type Shell struct {
 
 客户端收到了`[Action]`，解析并根据对应消息解析了内容，构造返回数据包
 
+继续沉睡30秒，循环
+# Client第三次循环
 客户响应`Work` ->
 ```json
 {
@@ -203,12 +190,19 @@ type Shell struct {
 	"next_second": 30
 }
 ```
-继续沉睡30秒，循环
 
-服务器收到`result`，把内容广播给前端，前端解析给用户
-
+服务器收到`result`，把内容广播给前端，前端解析给用户，然后任务队列中已经无任务。继续返回
 
 
+<- 服务器
+```json
+[{
+	"do": "",
+	"data": ""
+}]
+```
+
+客户此步骤无限循环直到前端再次塞入消息
 
 
 

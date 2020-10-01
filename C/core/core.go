@@ -47,7 +47,8 @@ func (c *Core) Pool() {
 		fmt.Println("Loop")
 		time.Sleep(time.Duration(c.sleep) * time.Second)
 		var result []Action
-		data := Work{Uuid: c.uuid, Info: c.info}
+		data := Work{Uuid: c.uuid, Result: c.event, Info: c.info, NextSecond: c.sleep}
+		c.event = nil
 		bytesJson, err := json.Marshal(data)
 		if err != nil {
 			fmt.Println(1)
@@ -118,22 +119,25 @@ func (c *Core) Pool() {
 				}
 			}
 		}
-		fmt.Println("Second Loop!")
-		data = Work{Uuid: c.uuid, Result: c.event, Info: c.info, NextSecond: c.sleep}
-		c.event = nil
-		bytesJson, err = json.Marshal(data)
+		/*
+			fmt.Println("Second Loop!")
+			data = Work{Uuid: c.uuid, Result: c.event, Info: c.info, NextSecond: c.sleep}
+			c.event = nil
+			bytesJson, err = json.Marshal(data)
 
-		if err != nil {
-			continue
-		}
-		encode = utils.ImmediateRC4(bytesJson)
-		req, err = http.NewRequest("POST", c.remoteAddress, bytes.NewReader(encode))
-		if err != nil {
-			continue
-		}
-		req.Header.Add("UA", "android")
-		resp, err = client.Do(req)
-		body, err = ioutil.ReadAll(resp.Body)
+			if err != nil {
+				continue
+			}
+			encode = utils.ImmediateRC4(bytesJson)
+			req, err = http.NewRequest("POST", c.remoteAddress, bytes.NewReader(encode))
+			if err != nil {
+				continue
+			}
+			req.Header.Add("UA", "android")
+			resp, err = client.Do(req)
+			body, err = ioutil.ReadAll(resp.Body)
+
+		*/
 		fmt.Println("Loop End!")
 	}
 }
