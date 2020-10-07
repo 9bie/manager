@@ -7,6 +7,18 @@
 
 之后Client段接受到json解析json类型字段做出相应动作并返回数据给Server，最后Server再把数据呈现给前端
 
+# 如何编译
+## Server
+自带env虚拟环境，跑就完事了
+## Client
+请将此目录下的Client添加到项目GOPATH
+
+或者是使用Client目录下的install.bat编译，之后检查client目录下的bin文件夹！
+
+或者是使用Client目录下的install.bat编译，之后检查client目录下的bin文件夹！
+
+或者是使用Client目录下的install.bat编译，之后检查client目录下的bin文件夹！
+
 ### Client
 每个Client都会有一个UUID，在存货期间生成，之后开始30秒循环发送配置信息
 

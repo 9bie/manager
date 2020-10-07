@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./core"
+	"C/core"
 )
 
 func main() {

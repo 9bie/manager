@@ -1,9 +1,9 @@
 package core
 
 import (
-	"../config"
-	"../shell"
-	"../utils"
+	"C/config"
+	"C/shell"
+	"C/utils"
 	"bytes"
 	"encoding/base64"
 	"encoding/json"

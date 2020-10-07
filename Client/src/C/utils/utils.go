@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"../config"
+	"C/config"
 	"crypto/rc4"
 	"encoding/base64"
 	"fmt"
