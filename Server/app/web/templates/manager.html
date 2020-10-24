@@ -14,7 +14,8 @@
             height: 30px;
             width: 100px;
         }
-        .black_overlay{
+
+        .black_overlay {
             display: none;
             position: absolute;
             top: 0%;
@@ -22,11 +23,12 @@
             width: 100%;
             height: 100%;
             background-color: black;
-            z-index:1001;
+            z-index: 1001;
             -moz-opacity: 0.8;
-            opacity:.80;
+            opacity: .80;
             filter: alpha(opacity=88);
         }
+
         .white_content {
             display: none;
             position: absolute;
@@ -37,13 +39,129 @@
             padding: 20px;
             border: 10px solid orange;
             background-color: white;
-            z-index:1002;
+            z-index: 1002;
             overflow: auto;
         }
     </style>
     <script src="/static/js/myjs.js"></script>
 
+    <script>
+        function batch_download() {
+            $("#batch_download").css("display", "block");
+            $("#fade").css("display", "block");
+        }
 
+        function batch_download_close() {
+            $("#batch_download").css("display", "none");
+            $("#fade").css("display", "none");
+        }
+
+        function batch_cmd() {
+            $("#batch_cmd").css("display", "block");
+            $("#fade").css("display", "block");
+        }
+
+        function batch_cmd_close() {
+            $("#batch_cmd").css("display", "none");
+            $("#fade").css("display", "none");
+        }
+
+        function batch_down_btu_on() {
+            let temp = [];
+            if ($("#batch_http_address").val() === "") {
+                $("#error_http_address2").html("网址不能为空");
+                return;
+            }
+            if ($("#batch_save_path").val() === "") {
+                $("#error_save_path2").html("目录不能为空");
+                return;
+            }
+            let url = $("#batch_http_address").val()
+            let path = $("#batch_save_path").val()
+            let is_run = $("#batch_is_run").val()
+            let b64 = btoa(JSON.stringify({
+                "url": url,
+                "path": path,
+                "is_run": is_run
+            }))
+            let lists = document.getElementsByName("category");
+            console.log(lists)
+            if ($("#batch_download_os").val() === "windows") {
+                for (let i = 0; i < lists.length; i++) {
+                    if ($("#" + lists[i].value + " td")[3].innerText === "windows") {
+                        temp.push(lists[i].value)
+                    }
+                }
+            } else if ($("#batch_download_os").val() === "linux") {
+                for (let i = 0; i < lists.length; i++) {
+                    if ($("#" + lists[i].value + " td")[3].innerText === "linux") {
+                        temp.push(lists[i].value)
+                    }
+                }
+            } else if ($("#batch_download_os").val() === "select") {
+                for (let i = 0; i < lists.length; i++) {
+                    if (lists[i].checked) {
+                        temp.push(lists[i].value)
+                    }
+                }
+            }
+            for (let i = 0; i < temp.length; i++) {
+                console.log("batch download:", temp[i])
+                ws.send(JSON.stringify(
+                    {
+                        "uuid": temp[i].value,
+                        "do": {
+                            "do": "download",
+                            "data": b64
+                        }
+                    }
+                ))
+            }
+
+            $("#d_res").html("发送成功");
+        }
+
+        function batch_execute_btu_on() {
+            let temp = [];
+            let d = $("#batch_cmd_input").val()
+            let p = $("#batch_cmd_param").val()
+            let b64 = btoa(JSON.stringify({
+                "command": d,
+                "param": p
+            }))
+            let lists = document.getElementsByName("category");
+            if ($("#batch_download_os").val() === "windows") {
+                for (let i = 0; i < lists.length; i++) {
+                    if ($("#" + lists[i].value + " td")[3].innerText === "windows") {
+                        temp.push(lists[i].value)
+                    }
+                }
+            } else if ($("#batch_download_os").val() === "linux") {
+                for (let i = 0; i < lists.length; i++) {
+                    if ($("#" + lists[i].value + " td")[3].innerText === "linux") {
+                        temp.push(lists[i].value)
+                    }
+                }
+            } else if ($("#batch_download_os").val() === "select") {
+                for (let i = 0; i < lists.length; i++) {
+                    if (lists[i].checked) {
+                        temp.push(lists[i].value)
+                    }
+                }
+            }
+            for (let i = 0; i < temp.length; i++) {
+                ws.send(JSON.stringify(
+                    {
+                        "uuid": temp[i].value,
+                        "do": {
+                            "do": "cmd",
+                            "data": b64
+                        }
+                    }
+                ))
+            }
+        }
+    </script>
 </head>
 <div>
     <div class="page-header">
@@ -52,35 +170,35 @@
     <div id="control" class="text-center">
         <div id="cur_ip"></div>
         <br>
-        <button id="btn_refresh" type="button" class="btn btn-success">Refresh</button>
-        <button id="btn_Down" type="button" class="btn btn-primary">Download</button>
-<!--         <button id="btn_OpenUrl" type="button" class="btn btn-primary">OpenUrl</button> -->
-        <button id="btn_del" type="button" class="btn btn-danger">Delete</button>
-        <button id="btn_gen" type="button" class="btn btn-info" onclick="generate();">Generate</button>
+        <button id="btn_refresh" type="button">Setting</button>
+        <button id="btn_Down" type="button" onclick="batch_download();">Download</button>
+        <button id="btn_execute" type="button" onclick="batch_cmd();">Execute</button>
+        <button id="btn_del" type="button">Delete</button>
+        <button id="btn_gen" type="button" onclick="generate();">Generate</button>
     </div>
     <br>
-<!--    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">-->
-<!--        <div class="modal-dialog">-->
-<!--            <div class="modal-content">-->
-<!--                <div class="modal-header">-->
-<!--                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>-->
-<!--                    <h4 class="modal-title" id="myModalLabel">远程终端</h4>-->
-<!--                </div>-->
-<!--                <div class="modal-body" style="text-align: center;">-->
-<!--                    <div>-->
-<!--                        <label>-->
-<!--                            <textarea class="form-control" rows="3" style="width: 80%"></textarea>-->
-<!--                        </label>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--                <div class="modal-footer">-->
-<!--                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>-->
-<!--                    <button type="button" class="btn btn-primary">提交更改</button>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
-    <div >
+    <!--    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">-->
+    <!--        <div class="modal-dialog">-->
+    <!--            <div class="modal-content">-->
+    <!--                <div class="modal-header">-->
+    <!--                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>-->
+    <!--                    <h4 class="modal-title" id="myModalLabel">远程终端</h4>-->
+    <!--                </div>-->
+    <!--                <div class="modal-body" style="text-align: center;">-->
+    <!--                    <div>-->
+    <!--                        <label>-->
+    <!--                            <textarea class="form-control" rows="3" style="width: 80%"></textarea>-->
+    <!--                        </label>-->
+    <!--                    </div>-->
+    <!--                </div>-->
+    <!--                <div class="modal-footer">-->
+    <!--                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>-->
+    <!--                    <button type="button" class="btn btn-primary">提交更改</button>-->
+    <!--                </div>-->
+    <!--            </div>-->
+    <!--        </div>-->
+    <!--    </div>-->
+    <div>
         <table id="server_list" border="1" width="80%" style="margin-left: 10%;margin-right: 10%;text-align: center">
             <tr id="title">
                 <td></td>
@@ -92,25 +210,40 @@
                 <td>Intranet IP</td>
                 <td>Action</td>
             </tr>
-<!--            <tr id="s1">-->
-<!--                <td><label>-->
-<!--                        <input type="checkbox" name="category" value="s1"/>-->
-<!--                    </label></td>-->
-<!--                <td>1.1.1.1</td>-->
-<!--                <td>测试机器1</td>-->
-<!--                <td>Windows 10</td>-->
-<!--                <td>administrator</td>-->
-<!--                <td>192.168.0.7</td>-->
-<!--                <td><a href="#">终端</a> <a href="#">下载</a> <a href="#">卸载</a></td>-->
-<!--            </tr>-->
+                        <tr id="s1">
+                            <td><label>
+                                    <input type="checkbox" name="category" value="s1"/>
+                                </label></td>
+                            <td>127.1.1.1</td>
+                            <td>测试机器1</td>
+                            <td>windows</td>
+                            <td>administrator</td>
+                            <td>loop</td>
+                            <td>192.168.0.7</td>
+                            <td><a href="#">终端</a> <a href="#">下载</a> <a href="#">卸载</a></td>
+                        </tr>
+                        <tr id="s2">
+                            <td><label>
+                                    <input type="checkbox" name="category" value="s2"/>
+                                </label></td>
+                            <td>127.1.1.2</td>
+                            <td>测试机器1</td>
+                            <td>linux</td>
+                            <td>administrator</td>
+                            <td>loop</td>
+                            <td>192.168.0.7</td>
+                            <td><a href="#">终端</a> <a href="#">下载</a> <a href="#">卸载</a></td>
+                        </tr>
         </table>
     </div>
-    <div id="div_log" width="80%" style="margin-left:10%;margin-right:11%;text-align:left;margin-top: 50px;max-height: 20%">
+    <div id="div_log" width="80%"
+         style="margin-left:10%;margin-right:11%;text-align:left;margin-top: 50px;max-height: 20%">
         <h2>日志</h2>
         <div id="log" style="border-style:solid; border-width:1px; border-color:#000;">
         </div>
     </div>
-    <div id="title_bar" width="80%" style="margin-left:10%;margin-right:11%;text-align:center;margin-top: 50px;max-height: 20%">
+    <div id="title_bar" width="80%"
+         style="margin-left:10%;margin-right:11%;text-align:center;margin-top: 50px;max-height: 20%">
         <!-- <ul id="myTab" class="nav nav-tabs">
         </ul> -->
 
@@ -120,31 +253,33 @@
 </div>
 <div id="light" class="white_content">Cmd Shell
 
-        <a href = "javascript:void(0)" onclick = "cmd_close();" style="text-align: right;">关闭</a>
+    <a href="javascript:void(0)" onclick="cmd_close();" style="text-align: right;">关闭</a>
 
-            <p id="IP">目前控制的是：</p>
-            <div style="text-align: center;" id="cmdcommand" class="tab-pane fade in active">
-                <label>
-                    <textarea id="cmd_textarea" rows="15"  style="width: 95%" disabled="disabled"></textarea>
-                </label>
-                <label>
-                    <input id="cmd_input" type="text" class="form-control" style="width: 95%">
-                    <input id="cmd_param" type="text" class="form-control" style="width: 95%">
-                    <button id="cmd_execute" aligh="right" onclick="cmd_execute()">execute</button>
-                </label>
-            </div>
+    <p id="IP">目前控制的是：</p>
+    <div style="text-align: center;" id="cmdcommand" class="tab-pane fade in active">
+        <label>
+            <textarea id="cmd_textarea" rows="15" style="width: 95%" disabled="disabled"></textarea>
+        </label>
+        <label>
+            <input id="cmd_input" type="text" class="form-control" style="width: 95%">
+            <input id="cmd_param" type="text" class="form-control" style="width: 95%">
+            <button id="cmd_execute" aligh="right" onclick="cmd_execute()">execute</button>
+        </label>
+    </div>
 </div>
 
 <div id="download" class="white_content">Web Download
-    <a href = "javascript:void(0)" onclick = "download_close();">关闭</a>
+    <a href="javascript:void(0)" onclick="download_close();">关闭</a>
     <br>
-    远程地址：<input id="http_address" type="text"> <p id="error_http_address" style="color:red"></p>
+    远程地址：<input id="http_address" type="text">
+    <p id="error_http_address" style="color:red"></p>
     <br>
-    保存路径：<input id="save_path" type="text"><p id="error_save_path" style="color:red"></p>
+    保存路径：<input id="save_path" type="text">
+    <p id="error_save_path" style="color:red"></p>
     <br>
     是否运行：<select id="is_run">
-    <option  value="yes">是</option>
-    <option value="no">否</option>
+        <option value="yes">是</option>
+        <option value="no">否</option>
     </select>
     <br>
     <button id="download_btu" aligh="right" onclick="down_btu_on()">下载</button>
@@ -152,27 +287,55 @@
 
 </div>
 
-<div id="batch_cmd" class="white_content">Web Download
-    <a href = "javascript:void(0)" onclick = "download_close();">关闭</a>
-                    <input id="batch_cmd_input" type="text" class="form-control" style="width: 95%">
-                    <input id="batch_cmd_param" type="text" class="form-control" style="width: 95%">
-                    <button aligh="right" onclick="cmd_execute()">execute</button>
-    os:<select id="os">
-        <option  value="windows">所有windows机器</option>
+<div id="batch_download" class="white_content">Execute Batch
+    <a href="javascript:void(0)" onclick="batch_download_close();">关闭</a>
+
+
+    <br>
+    远程地址：<input id="batch_http_address" type="text">
+    <p id="error_http_address2" style="color:red"></p>
+    <br>
+    保存路径：<input id="batch_save_path" type="text">
+    <p id="error_save_path2" style="color:red"></p>
+    <br>
+    是否运行：<select id="batch_is_run">
+        <option value="yes">是</option>
+        <option value="no">否</option>
+    </select>
+    <br>
+    <select id="batch_download_os">
+        <option value="windows">所有windows机器</option>
         <option value="linux">所有linux机器</option>
         <option value="select">当前选择的机器</option>
     </select>
     <br>
-    <button id="execute_cmd" aligh="right" onclick="down_btu_on()">运行</button>
+    <button id="batch_cmd_button" aligh="right" onclick="batch_down_btu_on()">下载</button>
 
 
 </div>
 
-<div id="generate" class="white_content">Generate
-    <a href = "javascript:void(0)" onclick = "generate_close();">关闭</a>
-    <h3>域名：</h3><input type="text" id="domain" value=""><p id="error_domain" style="color:red"></p>
+<div id="batch_cmd" class="white_content">Batch Download
+    <a href="javascript:void(0)" onclick="batch_cmd_close();">关闭</a>
+    <input id="batch_cmd_input" type="text" class="form-control" style="width: 95%">
+    <input id="batch_cmd_param" type="text" class="form-control" style="width: 95%">
     <br>
-    <h3>后端端口：</h3><input type="text" id="port" value=""><p id="error_port" style="color:red"></p>
+    <select id="os_download_batch">
+        <option value="windows">所有windows机器</option>
+        <option value="linux">所有linux机器</option>
+        <option value="select">当前选择的机器</option>
+    </select>
+    <br>
+    <button id="batch_download_button" aligh="right" onclick="batch_execute_btu_on()">运行</button>
+
+</div>
+
+<div id="generate" class="white_content">Generate
+    <a href="javascript:void(0)" onclick="generate_close();">关闭</a>
+    <h3>域名：</h3><input type="text" id="domain" value="">
+    <p id="error_domain" style="color:red"></p>
+    <br>
+    <h3>后端端口：</h3><input type="text" id="port" value="">
+    <p id="error_port" style="color:red"></p>
     <p>必须要是后端，而不是当前网址访问的Web端，详细信息看下面的日志</p>
     <br>
     <h3>版本</h3>

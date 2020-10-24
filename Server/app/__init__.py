@@ -21,8 +21,8 @@ def __ws2backend():
     while True:
         action = ws.get_action()
         print("[!][W2B]Action:{}".format(action))
-
-        web.do_action(action["uuid"], action["do"])
+        if "uuid" in action and "do" in action:
+            web.do_action(action["uuid"], action["do"])
 
 
 def create_app(config):
