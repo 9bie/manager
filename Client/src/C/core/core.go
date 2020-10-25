@@ -115,8 +115,21 @@ func (c *Core) Pool() {
 					c.event = append(c.event, Result{Action: "download", Data: down.Download()})
 				}()
 
-			case "update":
-				// update :
+			case "remark":
+				var remark shell.Remark
+				remarkData, err := base64.StdEncoding.DecodeString(i.Data)
+				if err != nil {
+					c.event = append(c.event, Result{Action: "remark", Data: err.Error()})
+					break
+				}
+				err = json.Unmarshal([]byte(remarkData), &remark)
+				fmt.Println("remark",remark.Remark)
+				if err != nil {
+					c.event = append(c.event, Result{Action: "remark", Data: err.Error()})
+				}
+				go func() {
+					c.event = append(c.event, Result{Action: "remark", Data: remark.ChangeRemark()})
+				}()
 			case "sleep":
 				sleep, err := strconv.Atoi(i.Data)
 				if err == nil {

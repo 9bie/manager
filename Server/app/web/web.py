@@ -19,6 +19,13 @@ async def web_control():
 async def backend():
     # todo:check UA and other
     data = await request.get_data()
-    return handle(data)
+    return handle(data,request.remote_addr)
+    # 如果使用了反代，请把这行代码修改为
+    # return handle(data,request.headers['X-Real-Ip'])
+    # 同时在nginx中添加如下参数
+    # proxy_set_header Host $host: 8080;
+    # proxy_set_header X-Real-IP $remote_addr;
+    # proxy_set_header REMOTE-HOST $remote_addr;
+    # proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
 

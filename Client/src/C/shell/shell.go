@@ -1,6 +1,7 @@
 package shell
 
 import (
+	"C/utils"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -17,6 +18,14 @@ type Down struct {
 type Shell struct {
 	Command string `json:"command"`
 	Param   string `json:"param"`
+}
+type Remark struct {
+	Remark string `json:"remark"`
+}
+
+func (r Remark) ChangeRemark() string{
+
+	return utils.SetRemarks(r.Remark)
 }
 
 func (s Shell) ExecuteCmd() string {

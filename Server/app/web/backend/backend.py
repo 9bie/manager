@@ -4,13 +4,12 @@ import asyncio
 from app.utils import *
 from threading import Timer
 from time import sleep
+
 events = queue.Queue()
 Conn = {}
 
 
-
 def online_list():
-
     l = []
     for k in Conn:
         l.append({
@@ -49,7 +48,6 @@ def online(uuid):
 
 def offline(uuid):
     if uuid in Conn:
-
         events.put(
             {
                 "action": "offline",
@@ -63,11 +61,10 @@ def offline(uuid):
 
 
 def timer(uuid):
-        offline(uuid)
+    offline(uuid)
 
 
-
-def handle(packet):
+def handle(packet,ip):
     raw = rc4_decode(packet)
     data = loads(raw)
     first = False
@@ -82,20 +79,19 @@ def handle(packet):
                 "next_second": 30,
                 "do": []
             }
+            Conn[data["uuid"]]["info"]["ip"] = ip
             t.start()
             first = True
             online(data["uuid"])
 
         if "next_second" in data and data["next_second"] != 0 and not first:
-
             # 更新表中的时间为下次检测日期
             Conn[data["uuid"]]["timer"].cancel()
 
             Conn[data["uuid"]]["next_second"] = data["next_second"]
-            t = Timer(data["next_second"]+10, timer, (data["uuid"],))
+            t = Timer(data["next_second"] + 10, timer, (data["uuid"],))
             Conn[data["uuid"]]["timer"] = t
             t.start()
-
 
     if "result" in data and type(data["result"]) is list:
         if data["result"] is not []:
