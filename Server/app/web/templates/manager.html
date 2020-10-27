@@ -173,10 +173,10 @@
     <div id="control" class="text-center">
         <div id="cur_ip"></div>
         <br>
-        <button id="btn_refresh" type="button">Setting</button>
+<!--        <button id="btn_refresh" type="button">Setting</button>-->
         <button id="btn_Down" type="button" onclick="batch_download();">Download</button>
         <button id="btn_execute" type="button" onclick="batch_cmd();">Execute</button>
-        <button id="btn_del" type="button">Delete</button>
+<!--        <button id="btn_del" type="button">Delete</button>-->
         <button id="btn_gen" type="button" onclick="generate();">Generate</button>
     </div>
     <br>
@@ -213,30 +213,30 @@
                 <td>Intranet IP</td>
                 <td>Action</td>
             </tr>
-                        <tr id="s1">
-                            <td><label>
-                                    <input type="checkbox" name="category" value="s1"/>
-                                </label></td>
-                            <td>127.1.1.1</td>
-                            <td>测试机器1</td>
-                            <td>windows</td>
-                            <td>WINPC-SDASD123/administrator</td>
-                            <td>Loop</td>
-                            <td>192.168.0.7</td>
-                            <td><a href="#">终端</a> <a href="#">下载</a> <a href="#">备注</a> <a href="#">卸载</a></td>
-                        </tr>
-                        <tr id="s2">
-                            <td><label>
-                                    <input type="checkbox" name="category" value="s2"/>
-                                </label></td>
-                            <td>127.1.1.2</td>
-                            <td>测试机器1</td>
-                            <td>linux</td>
-                            <td>www-data</td>
-                            <td>Loop</td>
-                            <td>192.168.0.7</td>
-                            <td><a href="#">终端</a> <a href="#">下载</a> <a href="#">备注</a> <a href="#">卸载</a></td>
-                        </tr>
+<!--                        <tr id="s1">-->
+<!--                            <td><label>-->
+<!--                                    <input type="checkbox" name="category" value="s1"/>-->
+<!--                                </label></td>-->
+<!--                            <td>127.1.1.1</td>-->
+<!--                            <td>测试机器1</td>-->
+<!--                            <td>windows</td>-->
+<!--                            <td>WINPC-SDASD123/administrator</td>-->
+<!--                            <td>Loop</td>-->
+<!--                            <td>192.168.0.7</td>-->
+<!--                            <td><a href="#">终端</a> <a href="#">下载</a> <a href="#">备注</a></td>-->
+<!--                        </tr>-->
+<!--                        <tr id="s2">-->
+<!--                            <td><label>-->
+<!--                                    <input type="checkbox" name="category" value="s2"/>-->
+<!--                                </label></td>-->
+<!--                            <td>127.1.1.2</td>-->
+<!--                            <td>测试机器1</td>-->
+<!--                            <td>linux</td>-->
+<!--                            <td>www-data</td>-->
+<!--                            <td>Loop</td>-->
+<!--                            <td>192.168.0.7</td>-->
+<!--                            <td><a href="#">终端</a> <a href="#">下载</a> <a href="#">备注</a></td>-->
+<!--                        </tr>-->
         </table>
     </div>
     <div id="div_log" width="80%"
@@ -272,7 +272,7 @@
 </div>
 <div id="remark" class="white_content">Remark
 
-    <a href="javascript:void(0)" onclick="cmd_close();" style="text-align: right;">关闭</a>
+    <a href="javascript:void(0)" onclick="remark_close();" style="text-align: right;">关闭</a>
     <br>
     备注：<input id="remark_input" type="text">
 
@@ -343,25 +343,24 @@
 
 <div id="generate" class="white_content">Generate
     <a href="javascript:void(0)" onclick="generate_close();">关闭</a>
-    <h3>域名：</h3><input type="text" id="domain" value="">
-    <p id="error_domain" style="color:red"></p>
+    <h3>BackEnd地址：</h3><input type="text" id="domain" value="">
+
     <br>
-    <h3>后端端口：</h3><input type="text" id="port" value="">
-    <p id="error_port" style="color:red"></p>
-    <p>必须要是后端，而不是当前网址访问的Web端，详细信息看下面的日志</p>
+
+    <p>BackEnd地址一般是当前的http://url/backend/</p>
     <br>
     <h3>版本</h3>
     <select id="version">
-        <option value="onlyRun">仅运行</option>
-        <option value="default">安装</option>
-        <option value="autoRemove">安装后自动删除</option>
-        <option value="antiCloud">防云不删除</option>
-        <option value="full">全要</option>
+        <option value="windows_x86">Windows x86</option>
+        <option value="windows_x86_64">Windows x86_64</option>
+        <option value="linux_x86">linux x86</option>
+        <option value="linux_x86_64">linux x86_64</option>
+        <option value="arm">arm</option>
     </select>
     <br>
     <button id="generate_btu" aligh="right" onclick="generate_btu_on()">生成</button>
     <br>
-    <p>只写了仅运行和安装，其他都还没写</p>
+
 </div>
 <div id="fade" class="black_overlay"></div>
 <body>

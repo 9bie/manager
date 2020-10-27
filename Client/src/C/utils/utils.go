@@ -5,6 +5,8 @@ import (
 	"crypto/rc4"
 	"encoding/base64"
 	"fmt"
+
+	//"fmt"
 	"math/rand"
 	"net"
 	"os"
@@ -78,7 +80,8 @@ func EasyDeCrypto(input string) string {
 }
 
 func SetRemarks(remarks string) string {
-	err := os.Setenv("SysRemarks", EasyCrypto(remarks))
+	//fmt.Println("set env",remarks)
+	err := os.Setenv("SysRemarks", remarks)
 	if err != nil {
 		return err.Error()
 	} else {
@@ -87,10 +90,11 @@ func SetRemarks(remarks string) string {
 }
 
 func GetRemarks() string {
+	//fmt.Println("get env ",os.Getenv("SysRemarks") )
 	if os.Getenv("SysRemarks") == "" {
 		return config.Remarks
 	}
-	return EasyDeCrypto(os.Getenv("SysRemarks"))
+	return os.Getenv("SysRemarks")
 }
 
 // 0-linux 1-windwos 2=unkonw

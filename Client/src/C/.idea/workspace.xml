@@ -2,16 +2,23 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b77934c0-ed53-4354-a3cd-ac6fb3bb7f83" name="默认的" comment="">
+      <change afterPath="$PROJECT_DIR$/../../../Server/app/web/static/1603732223.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/core.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/core.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/shell/shell.go" beforeDir="false" afterPath="$PROJECT_DIR$/shell/shell.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/utils.go" beforeDir="false" afterPath="$PROJECT_DIR$/utils/utils.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../github.com/kr/text" beforeDir="false" afterPath="$PROJECT_DIR$/../github.com/kr/text" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../github.com/niemeyer/pretty" beforeDir="false" afterPath="$PROJECT_DIR$/../github.com/niemeyer/pretty" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../gopkg.in/check.v1" beforeDir="false" afterPath="$PROJECT_DIR$/../gopkg.in/check.v1" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src.rar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Server/app/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Server/app/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Server/app/utils/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Server/app/utils/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Server/app/web/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Server/app/web/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Server/app/web/backend/backend.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Server/app/web/backend/backend.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../../Server/app/web/static/js/myjs.js" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Server/app/web/static/js/myjs.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../../Server/app/web/templates/manager.html" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Server/app/web/templates/manager.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Server/app/web/web.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Server/app/web/web.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Server/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Server/config.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,7 +51,7 @@
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="com.goide.configuration.GoLibrariesConfigurableProvider" />
+    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
   </component>
   <component name="RunManager">
     <configuration name="go build C/" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
@@ -69,22 +76,22 @@
       <screen x="0" y="0" width="2048" height="1112" />
     </state>
     <state x="805" y="311" key="FileChooserDialogImpl/0.0.2048.1112@0.0.2048.1112" timestamp="1602049172772" />
-    <state width="2005" height="305" key="GridCell.Tab.0.bottom" timestamp="1603647318780">
+    <state width="2005" height="305" key="GridCell.Tab.0.bottom" timestamp="1603781470960">
       <screen x="0" y="0" width="2048" height="1112" />
     </state>
-    <state width="2005" height="305" key="GridCell.Tab.0.bottom/0.0.2048.1112@0.0.2048.1112" timestamp="1603647318780" />
-    <state width="2005" height="305" key="GridCell.Tab.0.center" timestamp="1603647318779">
+    <state width="2005" height="305" key="GridCell.Tab.0.bottom/0.0.2048.1112@0.0.2048.1112" timestamp="1603781470960" />
+    <state width="2005" height="305" key="GridCell.Tab.0.center" timestamp="1603781470960">
       <screen x="0" y="0" width="2048" height="1112" />
     </state>
-    <state width="2005" height="305" key="GridCell.Tab.0.center/0.0.2048.1112@0.0.2048.1112" timestamp="1603647318779" />
-    <state width="2005" height="305" key="GridCell.Tab.0.left" timestamp="1603647318778">
+    <state width="2005" height="305" key="GridCell.Tab.0.center/0.0.2048.1112@0.0.2048.1112" timestamp="1603781470960" />
+    <state width="2005" height="305" key="GridCell.Tab.0.left" timestamp="1603781470960">
       <screen x="0" y="0" width="2048" height="1112" />
     </state>
-    <state width="2005" height="305" key="GridCell.Tab.0.left/0.0.2048.1112@0.0.2048.1112" timestamp="1603647318778" />
-    <state width="2005" height="305" key="GridCell.Tab.0.right" timestamp="1603647318779">
+    <state width="2005" height="305" key="GridCell.Tab.0.left/0.0.2048.1112@0.0.2048.1112" timestamp="1603781470960" />
+    <state width="2005" height="305" key="GridCell.Tab.0.right" timestamp="1603781470960">
       <screen x="0" y="0" width="2048" height="1112" />
     </state>
-    <state width="2005" height="305" key="GridCell.Tab.0.right/0.0.2048.1112@0.0.2048.1112" timestamp="1603647318779" />
+    <state width="2005" height="305" key="GridCell.Tab.0.right/0.0.2048.1112@0.0.2048.1112" timestamp="1603781470960" />
     <state width="2005" height="376" key="GridCell.Tab.1.bottom" timestamp="1603476793833">
       <screen x="0" y="0" width="2048" height="1112" />
     </state>
@@ -101,9 +108,9 @@
       <screen x="0" y="0" width="2048" height="1112" />
     </state>
     <state width="2005" height="376" key="GridCell.Tab.1.right/0.0.2048.1112@0.0.2048.1112" timestamp="1603476793833" />
-    <state x="526" y="201" key="SettingsEditor" timestamp="1602049174084">
+    <state x="526" y="201" key="SettingsEditor" timestamp="1603730729225">
       <screen x="0" y="0" width="2048" height="1112" />
     </state>
-    <state x="526" y="201" key="SettingsEditor/0.0.2048.1112@0.0.2048.1112" timestamp="1602049174084" />
+    <state x="526" y="201" key="SettingsEditor/0.0.2048.1112@0.0.2048.1112" timestamp="1603730729225" />
   </component>
 </project>

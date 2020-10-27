@@ -26,6 +26,7 @@ def __ws2backend():
 
 
 def create_app(config):
+
     print("[+]App Running...")
     threading.Thread(target=__ws2backend).start()
     threading.Thread(target=__backend2ws).start()
@@ -33,6 +34,6 @@ def create_app(config):
 
     loop.run_until_complete(ws.create_server(config["websocket"]["host"], config["websocket"]["port"]))
     loop.run_until_complete(
-        web.create_server(config["web"]["debug"])
+        web.create_server(config)
     )
     loop.run_forever()

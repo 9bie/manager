@@ -14,7 +14,8 @@ def online_list():
     for k in Conn:
         l.append({
             "uuid": k,
-            "info": Conn[k]["info"]
+            "info": Conn[k]["info"],
+
         })
     return {
         "action": "just for you",
@@ -102,10 +103,13 @@ def handle(packet,ip):
                         "data": {
                             "uuid": data["uuid"],
                             "action": i["action"],
-                            "data": i["data"]
+                            "data": i["data"],
+                            "ip": Conn[data["uuid"]]["info"]["ip"]
                         }
                     }
                 )
+                if i["action"] == "remark":
+                    Conn[data["uuid"]]["info"] = data["info"]
 
     result = Conn[data["uuid"]]["do"]
     Conn[data["uuid"]]["do"] = []

