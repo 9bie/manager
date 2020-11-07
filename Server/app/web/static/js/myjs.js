@@ -1,5 +1,6 @@
 var u = prompt("username：", "admin");
 var p = prompt("password：", "123456");
+var po = prompt("port", "3287")
 var base = new Base64();
 var loc = window.location;
 var uri = 'ws:';
@@ -8,7 +9,8 @@ var nowip = '';
 if (loc.protocol === 'https:') {
     uri = 'wss:';
 }
-uri += '//127.0.0.1:3287';
+
+uri += '//' + document.domain + ':' + po;
 
 
 ws = new WebSocket(uri);
@@ -18,8 +20,12 @@ ws.onopen = function () {
 
 };
 ws.onmessage = function (evt) {
-    console.log(evt.data);
+
     let data = JSON.parse(evt.data)
+    console.log(data)
+    if(data["data"]===false){
+        $("#log").append("<p style='color:red'>密码错误</p>")
+    }
     if (data["login"] === true) {
         $("#log").append("<p style='color:blue'>后端连接成功</p>")
 
@@ -37,7 +43,7 @@ ws.onmessage = function (evt) {
             <td>` + z["info"]["user"] + `</td>
             <td>Loop</td>
             <td>` + z["info"]["iip"] + `</td>
-            <td><a href="javascript:new_cmd('` + z["info"]["ip"] + `','` + z["uuid"] + `');">终端</a> <a href="javascript:download('` + z["info"]["ip"] + `','` + z["uuid"] + `');" >下载</a> <a href="javascript:remark('`+z["uuid"] + `');">备注</a></td>
+            <td><a href="javascript:new_cmd('` + z["info"]["ip"] + `','` + z["uuid"] + `');">终端</a> <a href="javascript:download('` + z["info"]["ip"] + `','` + z["uuid"] + `');" >下载</a> <a href="javascript:remark('` + z["uuid"] + `');">备注</a></td>
             `
             );
             $("#log").append("<p style='color:green'>客户上线：" + z["info"]["ip"] + "</p>")
@@ -56,7 +62,7 @@ ws.onmessage = function (evt) {
             <td>` + i["user"] + `</td>
             <td>Loop</td>
             <td>` + i["iip"] + `</td>
-            <td><a href="javascript:new_cmd('` + data["data"]["info"]["ip"] + `','` + data["data"]["uuid"] + `');">终端</a> <a href="javascript:download('` + i["ip"] + `','` + data["data"]["uuid"] + `');" >下载</a> <a href="javascript:remark('`+data["data"]["uuid"] + `');">备注</a></td>
+            <td><a href="javascript:new_cmd('` + data["data"]["info"]["ip"] + `','` + data["data"]["uuid"] + `');">终端</a> <a href="javascript:download('` + i["ip"] + `','` + data["data"]["uuid"] + `');" >下载</a> <a href="javascript:remark('` + data["data"]["uuid"] + `');">备注</a></td>
             `
         );
         $("#log").append("<p style='color:green'>客户上线：" + i["ip"] + "</p>")
@@ -74,7 +80,7 @@ ws.onmessage = function (evt) {
             setTimeout(function () {
                 $("#" + data["data"]["uuid"] + " td")[5].innerText = "Loop"
             }, 5000);
-            $("#log").append("<p style='color:blue'>客户：" + data["data"]["ip"] + "返回：" + data["data"]["data"]+"</p>")
+            $("#log").append("<p style='color:blue'>客户：" + data["data"]["ip"] + "返回：" + data["data"]["data"] + "</p>")
         }
 
     }
@@ -158,27 +164,28 @@ function new_cmd(ip, id) {
 
 }
 
-function remark(id){
+function remark(id) {
     $("#remark").css("display", "block");
     $("#fade").css("display", "block");
     nowhandle = id;
-    console.log(nowhandle,id)
+    console.log(nowhandle, id)
 
 }
 
-function remark_close(){
+function remark_close() {
     $("#remark").css("display", "none");
     $("#fade").css("display", "none");
 }
-function remark_btu_on(){
+
+function remark_btu_on() {
     let remark = $("#remark_input").val()
-    if (remark === ""){
+    if (remark === "") {
         alert("备注不能为空")
         return
     }
     let b64 = btoa(JSON.stringify(
         {
-            "remark":remark
+            "remark": remark
         }
     ))
     ws.send(JSON.stringify(

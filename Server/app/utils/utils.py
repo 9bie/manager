@@ -29,7 +29,7 @@ def generate_client(address, t):
         f1 = raw + ".exe"
     elif t == "windows_x86_64":
         raw = windows_x86_64_path
-        f1 = raw+".exe"
+        f1 = raw + ".exe"
     elif t == "linux_x86":
         raw = linux_x86
         f1 = raw
@@ -40,9 +40,9 @@ def generate_client(address, t):
         raw = arm
         f1 = raw
     else:
-        return False, "未知错误",""
+        return False, "未知错误", ""
     if os.path.isfile(raw) is False:
-        return False, "源文件不存在",""
+        return False, "源文件不存在", ""
     f = open(raw, "rb")
     b = f.read()
     space = 80 - len(address)
@@ -51,7 +51,6 @@ def generate_client(address, t):
     newberry = bytearray(b)
     p = newberry.find(("b" * 80).encode())
     for i2 in last:
-
         newberry[p + i] = ord(i2)
         i += 1
     filename = str(int(time())) + ".bin"
@@ -60,4 +59,4 @@ def generate_client(address, t):
     f2.write(newberry)
     f2.close()
     f.close()
-    return True, filename,f1
+    return True, filename, f1

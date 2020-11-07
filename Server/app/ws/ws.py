@@ -1,6 +1,7 @@
 from json import loads,dumps
 from queue import Queue
 from ..web import online_list
+from ..config import CONFIG
 import asyncio
 import websockets
 
@@ -23,7 +24,7 @@ async def check_permit(w):
         recv = await w.recv()
         cred_dict = loads(recv)
 
-        if cred_dict["username"] == "admin" and cred_dict["password"] == "123456":
+        if cred_dict["username"] == CONFIG["base"]["username"] and cred_dict["password"] == CONFIG["base"]["password"]:
             user_list.add(w)
             await w.send(dumps({
                 "login": True,
