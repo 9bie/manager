@@ -1,7 +1,7 @@
 package config
 
 const (
-	RemoteAddress string = "RemoteAddress"
+	RemoteAddress string = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
 	DefaultSleep  int    = 30
 	Remarks       string = "default"
 )
