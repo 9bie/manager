@@ -21,21 +21,23 @@ def rc4_decode(i):
 def generate_client(address, t):
     windows_x86_path = os.path.join("bin", "windows_x86.exe")
     windows_x86_64_path = os.path.join("bin", "windows_x86_64.exe")
-    windows_dll = os.path.join("bin", "windows_dll.dll")
+    windows_dll_x86 = os.path.join("bin", "windows_dll_x86.dll")
+    windows_dll_x86_64 = os.path.join("bin", "windows_dll_x86_64.dll")
     linux_x86 = os.path.join("bin", "linux_x86")
     linux_x86_64 = os.path.join("bin", "linux_x86_64")
     linux_arm = os.path.join("bin", "linux_arm")
-    mac_x86 = os.path.join("bin", "mac_x86")
-    mac_x86_64 = os.path.join("bin", "mac_x86_64")
-    mac_arm = os.path.join("bin", "mac_arm")
+    mac = os.path.join("bin", "mac")
     if t == "windows_x86":
         raw = windows_x86_path
         f1 = raw + ".exe"
     elif t == "windows_x86_64":
         raw = windows_x86_64_path
         f1 = raw + ".exe"
-    elif t == "windows_dll":
-        raw = windows_dll
+    elif t == "windows_dll_x86":
+        raw = windows_dll_x86
+        f1 = raw + ".dll"
+    elif t == "windows_dll_x86_64":
+        raw = windows_dll_x86_64
         f1 = raw + ".dll"
     elif t == "linux_x86":
         raw = linux_x86
@@ -46,14 +48,9 @@ def generate_client(address, t):
     elif t == "linux_arm":
         raw = linux_arm
         f1 = raw
-    elif t == "mac_x86":
-        raw = mac_x86
-        f1 = raw
-    elif t == "mac_x86_64":
-        raw = mac_x86_64
-        f1 = raw
-    elif t == "mac_arm":
-        raw = mac_arm
+
+    elif t == "mac":
+        raw = mac
         f1 = raw
     else:
         return False, "未知错误", ""
