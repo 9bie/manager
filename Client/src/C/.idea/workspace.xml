@@ -2,8 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b77934c0-ed53-4354-a3cd-ac6fb3bb7f83" name="默认的" comment="">
+      <change afterPath="$PROJECT_DIR$/../../../Server/bin/请把编译后的文件放置于这里.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/config/config.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Server/app/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Server/app/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Server/app/utils/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Server/app/utils/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Server/app/web/static/js/myjs.js" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Server/app/web/static/js/myjs.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Server/app/web/templates/manager.html" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Server/app/web/templates/manager.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Server/manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Server/manager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../../readme.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

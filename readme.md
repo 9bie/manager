@@ -3,7 +3,29 @@
 
 ![不要吐槽前端](doc/img/index.png)
 
+## todo
+
+- 分组
+- sleep间隔修改
+- 分组定时任务
+- IP黑名单
+
+## 注意
+
+对客户端无过滤（懒得写），有潜在的XSS风险。
+
+## 关于反代
+
+修改`app/config/config.py`下的`CONFIG["base"]["cdn"] = False`改为True
+
+之后把`CONFIG["base"]["source_ip_tag"] = "X-Real-Ip"`修改为反代返回给你正确IP的tag
+
+
+
+
+
 # 开发文档
+
 核心是前端构建json包作为结构体传入后端，后端根据json包中指定的UUID决定是转发数据包还是广播数据包
 
 之后Client段接受到json解析json类型字段做出相应动作并返回数据给Server，最后Server再把数据呈现给前端

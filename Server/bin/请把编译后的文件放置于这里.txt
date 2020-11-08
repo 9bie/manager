@@ -1,0 +1,10 @@
+自行用golang交叉编译后放置于这里，文件名分别为：
+windows_x86.exe
+windows_x86_64.exe
+windows_dll.dll
+linux_x86
+linux_x86_64
+linux_arm
+mac_x86
+mac_x86_64
+mac_arm

@@ -5,6 +5,10 @@ from .web import create_server, get_action, do_action
 import asyncio
 from json import dumps
 import threading
+import os
+import signal
+import platform
+loop = asyncio.get_event_loop()
 
 
 def __backend2ws():
@@ -24,14 +28,23 @@ def __ws2backend():
             web.do_action(action["uuid"], action["do"])
 
 
+
+
 def create_app():
     print("[+]App Running...")
     threading.Thread(target=__ws2backend).start()
     threading.Thread(target=__backend2ws).start()
-    loop = asyncio.get_event_loop()
 
     loop.run_until_complete(ws.create_server(CONFIG["websocket"]["host"], CONFIG["websocket"]["port"]))
     loop.run_until_complete(
-        web.create_server(CONFIG)
+        web.create_server()
     )
     loop.run_forever()
+
+
+def close_app():
+    if platform.system() == "Windows":
+        pid = os.getpid()
+        os.popen('taskkill.exe /F /pid:' + str(pid))
+    else:
+        os.kill(os.getpid(),signal.SIGSTOP)

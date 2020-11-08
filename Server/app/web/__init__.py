@@ -1,11 +1,15 @@
 from .web import app,get_action,do_action,online_list
 from quart import *
+from ..config import CONFIG
 
 
-def create_server(config):
+def create_server():
     print("[+]Web Server Running...")
     # start_server = app.run(debug=debug)
-    return app.run_task(host=config["web"]["host"],
-                        port=config["web"]["port"],
-                        debug=config["web"]["debug"])
+    print("[+]BackEnd address: {}".format(CONFIG["web"]["backend"]))
+    print("[+]Web Control address: {}".format(CONFIG["web"]["web"]))
+
+    return app.run_task(host=CONFIG["web"]["host"],
+                        port=CONFIG["web"]["port"],
+                        debug=CONFIG["web"]["debug"])
 
