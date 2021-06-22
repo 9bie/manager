@@ -61,9 +61,6 @@ def offline(uuid):
         Conn.pop(uuid)
 
 
-def timer(uuid):
-    offline(uuid)
-
 
 def handle(packet,ip):
     raw = rc4_decode(packet)
@@ -73,26 +70,19 @@ def handle(packet,ip):
         return "", 404
     else:
         if data["uuid"] not in Conn:
-            t = Timer(40, timer, (data["uuid"],))
             Conn[data["uuid"]] = {
                 "info": data["info"],
-                "timer": t,
                 "next_second": 30,
-                "do": []
+                "do": [],
+                "time":int(round(time.time() * 1000))
             }
             Conn[data["uuid"]]["info"]["ip"] = ip
-            t.start()
-            first = True
             online(data["uuid"])
 
         if "next_second" in data and data["next_second"] != 0 and not first:
             # 更新表中的时间为下次检测日期
-            Conn[data["uuid"]]["timer"].cancel()
-
             Conn[data["uuid"]]["next_second"] = data["next_second"]
-            t = Timer(data["next_second"] + 10, timer, (data["uuid"],))
-            Conn[data["uuid"]]["timer"] = t
-            t.start()
+
 
     if "result" in data and type(data["result"]) is list:
         if data["result"] is not []:
