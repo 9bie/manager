@@ -121,49 +121,7 @@
             $("#batch_download_result").html("发送成功");
         }
 
-        function batch_execute_btu_on() {
-            let temp = [];
-            let d = $("#batch_cmd_input").val()
-            let p = $("#batch_cmd_param").val()
-            let b64 = btoa(JSON.stringify({
-                "command": d,
-                "param": p
-            }))
-            let lists = document.getElementsByName("category");
-            if ($("#batch_download_os").val() === "windows") {
-                for (let i = 0; i < lists.length; i++) {
-
-                    if ($("#" + lists[i].value + " td")[3].innerText === "windows") {
-                        temp.push(lists[i].value)
-                    }
-                }
-            } else if ($("#batch_download_os").val() === "linux") {
-                for (let i = 0; i < lists.length; i++) {
-                    if ($("#" + lists[i].value + " td")[3].innerText === "linux") {
-                        temp.push(lists[i].value)
-                    }
-                }
-            } else if ($("#batch_download_os").val() === "select") {
-                for (let i = 0; i < lists.length; i++) {
-                    if (lists[i].checked) {
-                        temp.push(lists[i].value)
-                    }
-                }
-            }
-            for (let i = 0; i < temp.length; i++) {
-                console.log("batch execute",temp[i])
-                ws.send(JSON.stringify(
-                    {
-                        "uuid": temp[i],
-                        "do": {
-                            "do": "cmd",
-                            "data": b64
-                        }
-                    }
-                ))
-                $("#batch_cmd_result").html("发送成功")
-            }
-        }
+   
     </script>
 </head>
 <div>

@@ -1,4 +1,4 @@
-CONFIG = {"web": {}, "websocket": {}, "database": {}, "base": {}}
+CONFIG = {"web": {},  "database": {}, "base": {}}
 
 # Base Access
 CONFIG["base"]["username"] = "admin"
@@ -12,12 +12,8 @@ CONFIG["web"]["debug"] = True
 CONFIG["web"]["host"] = "0.0.0.0"
 CONFIG["web"]["port"] = "5000"
 CONFIG["web"]["backend"] = "/backend/"
-CONFIG["web"]["web"] = "/web/"
+CONFIG["web"]["control"] = "/web/"
 
-
-# Web Sockets Access
-CONFIG["websocket"]["host"] = "0.0.0.0"
-CONFIG["websocket"]["port"] = 3287
 
 # DataBase Access
 CONFIG["database"]["is_mysql"] = False

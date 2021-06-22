@@ -11,7 +11,7 @@ app = Quart(__name__, static_folder="static")
 # app.logger.addHandler(handler)
 
 
-@app.route(CONFIG["web"]["web"])
+@app.route(CONFIG["web"]["control"])
 async def web_control():
     return await render_template("manager.html")
 

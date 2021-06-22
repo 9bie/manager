@@ -79,23 +79,6 @@ func EasyDeCrypto(input string) string {
 
 }
 
-func SetRemarks(remarks string) string {
-	//fmt.Println("set env",remarks)
-	err := os.Setenv("SysRemarks", remarks)
-	if err != nil {
-		return err.Error()
-	} else {
-		return "Change Remark Successful"
-	}
-}
-
-func GetRemarks() string {
-	//fmt.Println("get env ",os.Getenv("SysRemarks") )
-	if os.Getenv("SysRemarks") == "" {
-		return config.Remarks
-	}
-	return os.Getenv("SysRemarks")
-}
 
 // 0-linux 1-windwos 2=unkonw
 func GetOSVersion() int {

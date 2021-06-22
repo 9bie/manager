@@ -1,26 +1,22 @@
 # coding:utf-8
-import queue
 import asyncio
 from app.utils import *
 from threading import Timer
 from time import sleep
 
-events = queue.Queue()
+
 Conn = {}
 
 
-def online_list():
+def get_list():
     l = []
     for k in Conn:
         l.append({
             "uuid": k,
-            "info": Conn[k]["info"],
+            "conn": Conn[k],
 
         })
-    return {
-        "action": "just for you",
-        "data": l
-    }
+    return l
 
 
 def get_action():
@@ -29,37 +25,18 @@ def get_action():
 
 def do_action(uuid, do_something):
     if uuid not in Conn:
-        return
+        return False
     Conn[uuid]["do"].append(do_something)
+    return True
 
 
 def online(uuid):
     print("[!][BackEnd]Online:{}".format(uuid))
 
-    events.put(
-        {
-            "action": "online",
-            "data": {
-                "uuid": uuid,
-                "info": Conn[uuid]["info"]
-            }
-        }
-    )
-
 
 def offline(uuid):
     if uuid in Conn:
-        events.put(
-            {
-                "action": "offline",
-                "data": {
-                    "uuid": uuid,
-                    "info": Conn[uuid]["info"]["ip"]
-                }
-            }
-        )
         Conn.pop(uuid)
-
 
 
 def handle(packet,ip):
@@ -69,40 +46,7 @@ def handle(packet,ip):
     if "uuid" not in data or "info" not in data:
         return "", 404
     else:
-        if data["uuid"] not in Conn:
-            Conn[data["uuid"]] = {
-                "info": data["info"],
-                "next_second": 30,
-                "do": [],
-                "time":int(round(time.time() * 1000))
-            }
-            Conn[data["uuid"]]["info"]["ip"] = ip
-            online(data["uuid"])
-
-        if "next_second" in data and data["next_second"] != 0 and not first:
-            # 更新表中的时间为下次检测日期
-            Conn[data["uuid"]]["next_second"] = data["next_second"]
-
-
-    if "result" in data and type(data["result"]) is list:
-        if data["result"] is not []:
-            for i in data["result"]:
-                events.put(
-                    {
-                        "action": "result",
-                        "data": {
-                            "uuid": data["uuid"],
-                            "action": i["action"],
-                            "data": i["data"],
-                            "ip": Conn[data["uuid"]]["info"]["ip"]
-                        }
-                    }
-                )
-                if i["action"] == "remark":
-                    Conn[data["uuid"]]["info"] = data["info"]
-
-    result = Conn[data["uuid"]]["do"]
-    Conn[data["uuid"]]["do"] = []
+        pass
     return rc4_encode(
-        dumps(result)
+        
     )
