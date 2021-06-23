@@ -1,7 +1,7 @@
 # swap layout
 from .config import *
 #from .ws import create_server, get_action, broadcast
-from .web import create_server, get_action, do_action
+from .web import create_server
 import asyncio
 from json import dumps
 import threading

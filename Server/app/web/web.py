@@ -1,6 +1,7 @@
 from .backend import *
 from ..utils import generate_client
 from quart import *
+import time
 from ..config import CONFIG
 
 # import logging
@@ -14,6 +15,18 @@ app = Quart(__name__, static_folder="static")
 @app.route(CONFIG["web"]["control"])
 async def web_control():
     return await render_template("manager.html")
+
+@app.route(CONFIG["web"]["control"] + "client/<uuid>",methods=['GET','POST'])
+async def web_control_client(uuid):
+    if request.method == 'GET':
+        conn = get_conn(uuid)
+        events = get_events(uuid)
+        if not conn:
+            return "",404
+        return await render_template("control.html",conn=conn,events=events)
+    else:
+        return await ""
+
 
 
 @app.route(CONFIG["web"]["backend"], methods=['POST'])

