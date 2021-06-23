@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"C/config"
+	"github.com/9bie/manager/Client/config"
 	"crypto/rc4"
 	"encoding/base64"
 	"fmt"
@@ -26,7 +26,7 @@ type Information struct {
 func GetInformation() Information {
 	return Information{
 		User:    GetUser(),
-		Remarks: GetRemarks(),
+		Remarks: config.Remarks,
 		IIP:     GetIPAddress(),
 		System:  runtime.GOOS,
 	}

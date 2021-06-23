@@ -45,9 +45,9 @@
         <br>
         <form action="?action=shell" method="POST">
             <label>
-                应用地址：<input id="target" type="text" >
+                应用地址：<input name="target" type="text" >
                 <br>
-                携带参数：<input id="param" type="text">
+                携带参数：<input name="param" type="text">
                 <br>
                 <input type="submit" value="提交">
             </label>
@@ -60,7 +60,7 @@
         <h3>修改备注</h3>
         <br>
         <form action="?action=remark" method="POST">
-            更改备注：<input id="remark_input" type="text">
+            更改备注：<input name="remark_text" type="text">
             <br>
             <input type="submit" value="提交">
         </form>
@@ -72,16 +72,18 @@
     <div id="download" class="t">
         <h3>下载文件</h3>
         <br>
-        远程地址：<input id="http" type="text">
-        <br>
-        保存路径：<input id="path" type="text">
-        <br>
-        是否运行：<select id="is_run">
-                    <option value="yes">是</option>
-                    <option value="no">否</option>
-                </select>
+        <form action="?action=download" method="POST">
+            远程地址：<input name="http" type="text">
             <br>
-        <input type="submit" value="提交">
+            保存路径：<input name="path" type="text">
+            <br>
+            是否运行：<select name="is_run">
+                        <option value="yes">是</option>
+                        <option value="no">否</option>
+                    </select>
+                <br>
+            <input type="submit" value="提交">
+        </form>
     </div>
 </center>
 

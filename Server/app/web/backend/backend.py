@@ -5,8 +5,8 @@ from threading import Timer
 import time
 from json import dumps
 
-Conn = {"test":{"uuid":"test","ip":"192.168.0.1","info":{"remarks":"test"}}}
-Events = {"global":[],"test":["this is test"]}
+Conn = {}
+Events = {"global":[]}
 Do = {}
 
 def get_conn(uuid):
@@ -21,10 +21,10 @@ def get_list(length=0):
 
 def add_events(uuid,data):
     if uuid not in Events:
-        return False
+        return 
     else:
         Events[uuid].append(data)
-        return True
+        return 
 
 
 def get_events(uuid,length=20):
@@ -38,9 +38,9 @@ def get_events(uuid,length=20):
 
 def do_action(uuid, do_something):
     if uuid not in Conn and uuid not in Do:
-        return False
+        return 
     Do[uuid].append(do_something)
-    return True
+    return 
 
 def clear(time=60000):
     for i in Conn:
@@ -60,25 +60,27 @@ def handle(packet,ip):
     if "uuid" not in data:
         return "", 404
     else:
-        print("[!][BackEnd]Online:{}".format(ip))
-        add_events("global","[+]%s:Online IP:%s" % (time.asctime(time.localtime(time.time())),ip)  )
-
+        if(data["uuid"] not in Conn):
+            print("[!][BackEnd]Online:{}".format(ip))
+            add_events("global","[+]%s:Online IP:%s" % (time.asctime(time.localtime(time.time())),ip)  )
         Conn[data["uuid"]] = {
         "ip":ip,
         "uuid":data["uuid"],
         "sleep":data["sleep"],
-        "heartbeat":int(round(time.time() * 1000)),
+        "heartbeat":int(time.time() ),
         "info":data["info"],
         }
         if data["uuid"] not in Events:
             Events[data["uuid"]] = []
         else:
-            for i in data["result"]:
-                event = "Client %s>>>\n%s\nClient End <<<\n\n" %(time.asctime(time.localtime(time.time())),i)
-                add_events(data["uuid"],event)
+            if data["result"]:
+                for i in data["result"]:
+                    event = "Client %s>>>\n%s\nClient End <<<\n\n" %(time.asctime(time.localtime(time.time())),i)
+                    add_events(data["uuid"],event)
 
         if data["uuid"] not in Do:
             Do[data["uuid"]] = []
+        
     ret = dumps(Do[data["uuid"]])
 
     Do[data["uuid"]] = []

@@ -1,7 +1,6 @@
 package shell
 
 import (
-	"C/utils"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -22,10 +21,7 @@ type Remark struct {
 	Remark string `json:"remark"`
 }
 
-func (r Remark) ChangeRemark() string {
 
-	return utils.SetRemarks(r.Remark)
-}
 
 func (s Shell) ExecuteCmd() string {
 
