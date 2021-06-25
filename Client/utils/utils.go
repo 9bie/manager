@@ -4,7 +4,6 @@ import (
 	"github.com/9bie/manager/Client/config"
 	"crypto/rc4"
 	"encoding/base64"
-	"fmt"
 
 	//"fmt"
 	"math/rand"
@@ -33,6 +32,9 @@ func GetInformation() Information {
 }
 
 func RandStringRunes(n int) string {
+
+	rand.Seed(time.Now().UnixNano())
+
 	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	b := make([]rune, n)
 	for i := range b {
@@ -98,7 +100,7 @@ func GetIPAddress() string {
 	var IP string
 	adders, err := net.InterfaceAddrs()
 	if err != nil {
-		fmt.Println(err)
+		
 		os.Exit(1)
 	}
 	for _, address := range adders {

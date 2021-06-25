@@ -5,14 +5,16 @@
 
 ## todo
 
-- 分组
-- sleep间隔修改
-- 分组定时任务
-- IP黑名单
+- 后台密码验证
+- 客户名单分页
+- 日志分页
+- 还有啥暂时想不到了
+- 多用户模式
+
 
 ## 注意
 
-对客户端无过滤（懒得写），有潜在的XSS风险。
+对客户端仅有略微过滤，有潜在的XSS和SSTI风险。
 
 ## 关于反代
 
@@ -30,7 +32,7 @@
 ## Server
 需要以下依赖：
 
-	- flask
+	- quert
 
 ## Client
 
@@ -38,5 +40,6 @@
  - mv $GOPATH/9bie/manager/Client
  - go build
 
+你编译的config.go中的http地址必须是你py项目config.py里的`CONFIG["web"]["control"] `地址
 
 

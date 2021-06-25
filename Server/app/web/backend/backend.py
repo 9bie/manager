@@ -3,7 +3,8 @@ import asyncio
 from app.utils import *
 from threading import Timer
 import time
-from json import dumps
+from json import dumps,loads
+import html
 
 Conn = {}
 Events = {"global":[]}
@@ -18,11 +19,18 @@ def get_list(length=0):
     else:
         # todo: 整个分页
         return Conn
+def del_events(uuid):
+    if uuid in Events:
+        Events[uuid] = []
+
 
 def add_events(uuid,data):
     if uuid not in Events:
         return 
     else:
+        print("[!]Event add from %s\n==========\n%s\n=========="%(uuid,data["data"]))
+        data["action"] = html.escape(data["action"])
+        data["data"] = html.escape(data["data"])
         Events[uuid].append(data)
         return 
 
@@ -39,13 +47,20 @@ def get_events(uuid,length=20):
 def do_action(uuid, do_something):
     if uuid not in Conn and uuid not in Do:
         return 
-    Do[uuid].append(do_something)
+    if uuid == "all":
+        for i in Do.values():
+            i.append(do_something)
+    else:
+        Do[uuid].append(do_something)
     return 
 
-def clear(time=60000):
-    for i in Conn:
-        if int(round(time.time() * 1000)) - i["sleep"] > time:
-            offline(i["uuid"])
+def clear_all(t=600):
+    del_conn = []
+    for i in Conn.values():
+        if int(time.time()) - i["heartbeat"] > int(t):
+            del_conn.append(i["uuid"])
+    for i in del_conn:
+        offline(i)
 
 
 def offline(uuid):
@@ -62,12 +77,24 @@ def handle(packet,ip):
     else:
         if(data["uuid"] not in Conn):
             print("[!][BackEnd]Online:{}".format(ip))
-            add_events("global","[+]%s:Online IP:%s" % (time.asctime(time.localtime(time.time())),ip)  )
+            event = {
+                "is_client":True,
+                "action":"global",
+                "time":time.asctime(time.localtime(time.time())),
+                "data":"[+]%s:Online IP:%s" % (time.asctime(time.localtime(time.time())),ip)
+            }
+            add_events("global", event )
+        data["info"]["remarks"] = html.escape(data["info"]["remarks"])
+        data["info"]["system"] = html.escape(data["info"]["system"])
+        data["info"]["user"] = html.escape(data["info"]["user"])
+        data["info"]["iip"] = html.escape(data["info"]["iip"])
+
+
         Conn[data["uuid"]] = {
-        "ip":ip,
-        "uuid":data["uuid"],
+        "ip":html.escape(ip),
+        "uuid":html.escape(data["uuid"]),
         "sleep":data["sleep"],
-        "heartbeat":int(time.time() ),
+        "heartbeat":int(time.time()),
         "info":data["info"],
         }
         if data["uuid"] not in Events:
@@ -75,12 +102,19 @@ def handle(packet,ip):
         else:
             if data["result"]:
                 for i in data["result"]:
-                    event = "Client %s>>>\n%s\nClient End <<<\n\n" %(time.asctime(time.localtime(time.time())),i)
+                    
+                   
+                    event = {
+                        "is_client":True,
+                        "action":i["action"],
+                        "time":time.asctime(time.localtime(time.time())),
+                        "data":i["data"]
+                    }
                     add_events(data["uuid"],event)
 
         if data["uuid"] not in Do:
             Do[data["uuid"]] = []
-        
+
     ret = dumps(Do[data["uuid"]])
 
     Do[data["uuid"]] = []

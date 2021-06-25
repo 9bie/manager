@@ -1,8 +1,10 @@
 package shell
 
 import (
+	"github.com/9bie/manager/Client/utils"
 	"io"
-	"io/ioutil"
+	// "fmt"
+	// "io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
@@ -15,36 +17,28 @@ type Down struct {
 }
 type Shell struct {
 	Command string `json:"command"`
-	Param   string `json:"param"`
 }
 type Remark struct {
 	Remark string `json:"remark"`
+}
+type Sleep struct {
+	Sleep int `json:"sleep"`
 }
 
 
 
 func (s Shell) ExecuteCmd() string {
-
-	cmd := exec.Command(s.Command, s.Param)
-
-	stdout, _ := cmd.StdoutPipe()
-
-	defer stdout.Close() // 保证关闭输出流
-
-	if err := cmd.Start(); err != nil { // 运行命令
-		//fmt.Println(err.Error())
-		return err.Error()
-
+	var cmd *exec.Cmd
+	if utils.GetOSVersion() == 0{
+		cmd = exec.Command("sh","-c", s.Command)
+	}else{
+		cmd = exec.Command("cmd.exe","/c", s.Command)
 	}
+	
 
-	if opBytes, err := ioutil.ReadAll(stdout); err != nil { // 读取输出结果
+	stdout, _ := cmd.CombinedOutput()
 
-		return err.Error()
-
-	} else {
-		//fmt.Println("execute", string(opBytes))
-		return string(opBytes)
-	}
+	return string(stdout)
 }
 func (d Down) Download() string {
 
