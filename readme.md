@@ -5,14 +5,16 @@
 
 ## todo
 
-- 分组
-- sleep间隔修改
-- 分组定时任务
-- IP黑名单
+- 后台密码验证
+- 客户名单分页
+- 日志分页
+- 还有啥暂时想不到了
+- 多用户模式
+
 
 ## 注意
 
-对客户端无过滤（懒得写），有潜在的XSS风险。
+对客户端仅有略微过滤，有潜在的XSS和SSTI风险。
 
 ## 关于反代
 
@@ -22,28 +24,22 @@
 
 
 
-
-
-# 开发文档
-
-核心是前端构建json包作为结构体传入后端，后端根据json包中指定的UUID决定是转发数据包还是广播数据包
-
-之后Client段接受到json解析json类型字段做出相应动作并返回数据给Server，最后Server再把数据呈现给前端
-
-详细实现可以看:[详细实现以及完整流程](doc/archive.md)
-
 # 关于Release
 
 其自行编译Client使用交叉编译放置于`Server/bin`下面
 
 # 如何编译
 ## Server
-自带env虚拟环境，跑就完事了
+需要以下依赖：
+
+	- quert
+
 ## Client
-请将此目录下的Client添加到项目GOPATH
 
-或者是使用Client目录下的install.bat编译，之后检查client目录下的bin文件夹！
+ - 把此项目clone到你的GOPATH
+ - mv $GOPATH/9bie/manager/Client
+ - go build
 
-
+你编译的config.go中的http地址必须是你py项目config.py里的`CONFIG["web"]["control"] `地址
 
 

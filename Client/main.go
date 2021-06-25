@@ -1,7 +1,7 @@
 package main
 
 import (
-	"C/core"
+	"github.com/9bie/manager/Client/core"
 	"time"
 )
 

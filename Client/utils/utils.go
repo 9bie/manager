@@ -1,10 +1,9 @@
 package utils
 
 import (
-	"C/config"
+	"github.com/9bie/manager/Client/config"
 	"crypto/rc4"
 	"encoding/base64"
-	"fmt"
 
 	//"fmt"
 	"math/rand"
@@ -26,13 +25,16 @@ type Information struct {
 func GetInformation() Information {
 	return Information{
 		User:    GetUser(),
-		Remarks: GetRemarks(),
+		Remarks: config.Remarks,
 		IIP:     GetIPAddress(),
 		System:  runtime.GOOS,
 	}
 }
 
 func RandStringRunes(n int) string {
+
+	rand.Seed(time.Now().UnixNano())
+
 	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	b := make([]rune, n)
 	for i := range b {
@@ -79,23 +81,6 @@ func EasyDeCrypto(input string) string {
 
 }
 
-func SetRemarks(remarks string) string {
-	//fmt.Println("set env",remarks)
-	err := os.Setenv("SysRemarks", remarks)
-	if err != nil {
-		return err.Error()
-	} else {
-		return "Change Remark Successful"
-	}
-}
-
-func GetRemarks() string {
-	//fmt.Println("get env ",os.Getenv("SysRemarks") )
-	if os.Getenv("SysRemarks") == "" {
-		return config.Remarks
-	}
-	return os.Getenv("SysRemarks")
-}
 
 // 0-linux 1-windwos 2=unkonw
 func GetOSVersion() int {
@@ -115,7 +100,7 @@ func GetIPAddress() string {
 	var IP string
 	adders, err := net.InterfaceAddrs()
 	if err != nil {
-		fmt.Println(err)
+		
 		os.Exit(1)
 	}
 	for _, address := range adders {
